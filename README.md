@@ -10,7 +10,7 @@ It is designed to answer three questions:
 
 ## Project status
 
-V2 foundation work is in progress. PostgreSQL-backed ingestion now covers official news, arXiv AI papers, and selected first-party GitHub releases; story clustering and the public product remain ahead.
+V2 foundation work is in progress. PostgreSQL-backed ingestion covers official news, arXiv AI papers, and selected first-party GitHub releases. Explainable relevance scoring, conservative Story clustering, and the first public reading interface are now available.
 
 ## Architecture
 
@@ -38,7 +38,7 @@ See [docs/architecture.md](docs/architecture.md) for the current boundaries.
 ## Workspace
 
 ```text
-apps/web             Public website and API (planned)
+apps/web             Public Story feed, detail pages, and JSON API
 packages/database    PostgreSQL schema and database client
 packages/sources     Source contracts, registry, and RSS adapters
 packages/pipeline    Normalization, exact deduplication, and ingestion
@@ -66,6 +66,7 @@ pnpm test
 pnpm ingest:due
 pnpm process:stories
 pnpm sources:health
+pnpm dev:web
 ```
 
 Configured sources currently include [OpenAI News](https://openai.com/news/), arXiv AI categories, and stable releases from Ollama and vLLM. See [docs/sources.md](docs/sources.md) for source policy and adapter behavior.
@@ -73,6 +74,8 @@ Configured sources currently include [OpenAI News](https://openai.com/news/), ar
 Scheduling is database-driven with exponential failure backoff and per-source leases. See [docs/operations.md](docs/operations.md) for commands, health semantics, and the deployment boundary.
 
 Relevant items are grouped with a conservative, versioned clustering baseline. See [docs/intelligence.md](docs/intelligence.md) for scoring signals, merge guards, and current limitations.
+
+The web app reads only persisted PostgreSQL data. It does not inject sample news when the database is missing or empty. The Story feed is available at `/`, Story details at `/stories/[slug]`, and JSON endpoints under `/api/stories` and `/api/health/sources`.
 
 ## Product principles
 
