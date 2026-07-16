@@ -59,11 +59,13 @@ export default async function Home({
     focusStory?.factualSummary ??
     focusStory?.excerpt ??
     "今日焦点正在等待第一条可验证的 Story。";
-  const focusFact =
-    focusStory?.assessmentReasons[0] ??
-    (focusStory
-      ? `这条进展来自 ${focusStory.sourceName ?? "当前信源"}，目前关联 ${focusStory.independentSourceCount} 个独立信源。`
-      : focusSummary);
+  const focusFact = focusStory
+    ? `这是一条来自 ${focusStory.sourceName ?? "当前信源"} 的${
+        focusStory.contentType
+          ? contentTypeLabels[focusStory.contentType]
+          : "情报"
+      }进展，目前关联 ${focusStory.independentSourceCount} 个独立信源。`
+    : focusSummary;
   const focusImplication =
     focusStory?.whyItMatters ??
     "产品启示尚未生成，先保留事实与信源边界，不补写结论。";

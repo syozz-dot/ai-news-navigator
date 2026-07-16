@@ -24,8 +24,7 @@ export function StoryRow({
   lead?: boolean;
 }) {
   const score = story.overallScore ?? story.relevanceScore;
-  const summary = story.factualSummary ?? story.excerpt;
-  const implication = story.whyItMatters ?? summary;
+  const implication = story.whyItMatters;
 
   return (
     <article className={lead ? "storyRow lead" : "storyRow"}>
@@ -61,7 +60,11 @@ export function StoryRow({
         </div>
       </div>
       <div className="storyDistill">
-        {implication ? <p>{implication}</p> : <p>产品意义尚未生成。</p>}
+        {implication ? (
+          <p>{implication}</p>
+        ) : (
+          <p>产品启示尚未生成，先保留事实与信源边界。</p>
+        )}
         <div className="storyEvidenceState">
           {story.status === "confirmed" ? (
             <CheckCircle aria-hidden="true" size={16} weight="fill" />
