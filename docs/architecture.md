@@ -52,6 +52,8 @@ SourceAdapter.fetch()
 
 The ingestion package depends on interfaces rather than a concrete database implementation. This keeps source adapters and pipeline behavior testable without PostgreSQL.
 
+The `jobs` workspace supplies the PostgreSQL implementation. Completing a source run updates both immutable run metrics and the source's current health. Exact conflicts on canonical URL or source external ID are counted as duplicates.
+
 ## Intelligence boundary
 
 Facts and interpretation remain separate:
@@ -64,8 +66,7 @@ No LLM provider is referenced by the domain model.
 
 ## Next architecture steps
 
-1. Implement a PostgreSQL ingestion repository.
-2. Add RSS, arXiv, and official-blog adapters.
-3. Generate and apply the initial migration.
-4. Add source health queries and retry policy.
-5. Add semantic story clustering only after exact deduplication is stable.
+1. Add arXiv and selected official-blog source definitions.
+2. Add source health read queries, alert thresholds, and retry policy.
+3. Add scheduled execution and deployment configuration.
+4. Add semantic story clustering only after exact deduplication is stable.

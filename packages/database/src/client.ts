@@ -18,3 +18,5 @@ export function createDatabase(databaseUrl = process.env.DATABASE_URL) {
     db: drizzle(client, { schema }),
   };
 }
+
+export type Database = ReturnType<typeof createDatabase>["db"];

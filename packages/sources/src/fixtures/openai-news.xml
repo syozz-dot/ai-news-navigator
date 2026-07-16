@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0">
+  <channel>
+    <title><![CDATA[OpenAI News]]></title>
+    <link>https://openai.com/news</link>
+    <item>
+      <title><![CDATA[First official update]]></title>
+      <description><![CDATA[<p>Research &amp; release details.</p>]]></description>
+      <content:encoded><![CDATA[<article>Full source content</article>]]></content:encoded>
+      <link>https://openai.com/index/first-update?utm_source=rss</link>
+      <guid isPermaLink="true">https://openai.com/index/first-update</guid>
+      <dc:creator><![CDATA[OpenAI]]></dc:creator>
+      <category><![CDATA[Research]]></category>
+      <category><![CDATA[Product]]></category>
+      <pubDate>Thu, 16 Jul 2026 03:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title><![CDATA[Second official update]]></title>
+      <description><![CDATA[An operational update.]]></description>
+      <link>https://openai.com/index/second-update</link>
+      <guid isPermaLink="true">https://openai.com/index/second-update</guid>
+      <category><![CDATA[Company]]></category>
+      <pubDate>Wed, 15 Jul 2026 12:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title><![CDATA[Older official update]]></title>
+      <link>https://openai.com/index/older-update</link>
+      <guid isPermaLink="true">https://openai.com/index/older-update</guid>
+      <pubDate>Wed, 01 Jul 2026 12:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>

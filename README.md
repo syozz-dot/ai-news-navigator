@@ -10,7 +10,7 @@ It is designed to answer three questions:
 
 ## Project status
 
-V2 foundation work is in progress. The current milestone focuses on source reliability, normalized data, exact deduplication, and a provider-neutral intelligence pipeline before UI development begins.
+V2 foundation work is in progress. PostgreSQL-backed ingestion and the first official RSS source are implemented; story clustering and the public product remain ahead.
 
 ## Architecture
 
@@ -40,9 +40,9 @@ See [docs/architecture.md](docs/architecture.md) for the current boundaries.
 ```text
 apps/web             Public website and API (planned)
 packages/database    PostgreSQL schema and database client
-packages/sources     Source contracts and registry types
+packages/sources     Source contracts, registry, and RSS adapters
 packages/pipeline    Normalization, exact deduplication, and ingestion
-jobs                 Scheduled ingestion entry points
+jobs                 PostgreSQL repository and ingestion entry points
 docs                 Product and engineering documentation
 ```
 
@@ -62,7 +62,10 @@ pnpm db:generate
 pnpm db:migrate
 pnpm check
 pnpm test
+pnpm ingest:openai-news
 ```
+
+The first configured source is [OpenAI News](https://openai.com/news/). See [docs/sources.md](docs/sources.md) for source policy and adapter behavior.
 
 ## Product principles
 

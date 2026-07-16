@@ -19,3 +19,9 @@ export async function runSourceJob(
 ): Promise<SourceRunResult> {
   return runIngestion(dependencies);
 }
+
+export {
+  PostgresIngestionRepository,
+  syncSourceDefinition,
+  type SyncedSource,
+} from "./postgres-ingestion-repository.js";
