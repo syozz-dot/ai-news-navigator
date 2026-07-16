@@ -21,6 +21,7 @@
     "ingest:due": "pnpm --filter @ai-news-navigator/jobs ingest:due",
     "sources:health": "pnpm --filter @ai-news-navigator/jobs sources:health",
     "process:stories": "pnpm --filter @ai-news-navigator/jobs process:stories",
+    "analyze:stories": "pnpm --filter @ai-news-navigator/jobs analyze:stories",
     "dev:web": "pnpm --filter @ai-news-navigator/web dev",
     "build:web": "pnpm --filter @ai-news-navigator/web build"
   },

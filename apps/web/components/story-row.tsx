@@ -25,6 +25,7 @@ export function StoryRow({
 }) {
   const score = story.overallScore ?? story.relevanceScore;
   const implication = story.whyItMatters;
+  const displayTitle = story.translatedTitle ?? story.title;
 
   return (
     <article className={lead ? "storyRow lead" : "storyRow"}>
@@ -47,7 +48,7 @@ export function StoryRow({
       </div>
       <div className="storyHeadline">
         <Link className="storyTitleLink" href={`/stories/${story.slug}`}>
-          <h2>{story.title}</h2>
+          <h2>{displayTitle}</h2>
         </Link>
         <div className="storySignals" aria-label="内容信号">
           {story.topics.slice(0, 2).map((topic) => (
@@ -84,7 +85,7 @@ export function StoryRow({
       <Link
         className="storyScoreLink"
         href={`/stories/${story.slug}`}
-        aria-label={`阅读 ${story.title}，相关度 ${formatScore(score)}`}
+        aria-label={`阅读 ${displayTitle}，相关度 ${formatScore(score)}`}
       >
         <span>{formatScore(score)}</span>
         <ArrowRight aria-hidden="true" size={18} weight="regular" />

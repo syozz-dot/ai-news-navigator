@@ -29,6 +29,13 @@
       "when": 1784183243584,
       "tag": "0003_narrow_titanium_man",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1784206419051,
+      "tag": "0004_wandering_power_man",
+      "breakpoints": true
     }
   ]
 }

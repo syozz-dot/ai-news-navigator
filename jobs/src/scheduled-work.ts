@@ -16,6 +16,11 @@ import {
   PostgresStoryProcessor,
   type StoryProcessingResult,
 } from "./story-processing.js";
+import {
+  PostgresStoryAnalysisProcessor,
+  type StoryAnalysisResult,
+  type StoryAnalyzer,
+} from "./story-analysis.js";
 
 export interface DueSourceIngestionResult {
   configuredCount: number;
@@ -152,5 +157,69 @@ export async function runStoryProcessing(input: {
     if (!released) {
       input.logger.warn("Story processing lease was no longer owned");
     }
+  }
+}
+
+export async function runStoryAnalysis(input: {
+  db: Database;
+  logger: IngestionLogger;
+  analyzer: StoryAnalyzer | null;
+  batchSize?: number;
+  concurrency?: number;
+}): Promise<StoryAnalysisResult & { acquired: boolean; configured: boolean }> {
+  const totals: StoryAnalysisResult & {
+    acquired: boolean;
+    configured: boolean;
+  } = {
+    acquired: false,
+    configured: input.analyzer !== null,
+    attemptedCount: 0,
+    generatedCount: 0,
+    skippedCount: 0,
+    failedCount: 0,
+  };
+  if (!input.analyzer) {
+    input.logger.warn(
+      "Story analysis skipped because AI Gateway is unavailable",
+    );
+    return totals;
+  }
+
+  const leaseOwner = createLeaseOwner();
+  const leaseKey = "story-analysis";
+  totals.acquired = await acquireJobLease({
+    db: input.db,
+    key: leaseKey,
+    owner: leaseOwner,
+    durationMs: 10 * 60_000,
+  });
+  if (!totals.acquired) {
+    input.logger.info(
+      "Story analysis skipped because another worker owns the lease",
+    );
+    return totals;
+  }
+
+  try {
+    const processor = new PostgresStoryAnalysisProcessor(
+      input.db,
+      input.logger,
+      input.analyzer,
+    );
+    const result = await processor.processBatch(
+      input.batchSize ?? 60,
+      input.concurrency ?? 5,
+    );
+    Object.assign(totals, result);
+    input.logger.info("Story analysis finished", { ...totals });
+    return totals;
+  } finally {
+    const released = await releaseJobLease({
+      db: input.db,
+      key: leaseKey,
+      owner: leaseOwner,
+    });
+    if (!released)
+      input.logger.warn("Story analysis lease was no longer owned");
   }
 }

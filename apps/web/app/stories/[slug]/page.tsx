@@ -26,7 +26,10 @@ export async function generateMetadata({
   const { slug } = await params;
   const story = await getStoryDetail(slug);
   return story
-    ? { title: story.title, description: story.factualSummary ?? story.excerpt }
+    ? {
+        title: story.translatedTitle ?? story.title,
+        description: story.factualSummary ?? story.excerpt,
+      }
     : { title: "Story 不存在" };
 }
 
@@ -42,6 +45,7 @@ export default async function StoryPage({
   const score = story.overallScore ?? story.relevanceScore;
   const factualSummary =
     story.analysis?.factualSummary ?? story.factualSummary ?? story.excerpt;
+  const displayTitle = story.analysis?.translatedTitle ?? story.title;
 
   return (
     <main className="storyPage">
@@ -60,7 +64,12 @@ export default async function StoryPage({
             <span>{story.sourceName ?? "未知信源"}</span>
             <span>{formatFullDateTime(story.lastPublishedAt)}</span>
           </div>
-          <h1>{story.title}</h1>
+          <h1>{displayTitle}</h1>
+          {story.analysis?.translatedTitle ? (
+            <p className="storyOriginalTitle" lang="en">
+              原文：{story.title}
+            </p>
+          ) : null}
           {factualSummary ? <p>{factualSummary}</p> : null}
         </header>
 
@@ -205,7 +214,7 @@ function MissingAnalysis({ label }: { label: string }) {
       <Circle aria-hidden="true" size={16} />
       <div>
         <strong>{label}尚未生成</strong>
-        <span>这里不会使用规则信号冒充完整结论。</span>
+        <span>系统将在下一次自动分析任务中补齐中文解读。</span>
       </div>
     </div>
   );

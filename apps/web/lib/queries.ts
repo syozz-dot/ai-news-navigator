@@ -22,6 +22,7 @@ export interface StoryFeedItem {
   slug: string;
   status: StoryStatus;
   title: string;
+  translatedTitle: string | null;
   factualSummary: string | null;
   firstPublishedAt: Date | null;
   lastPublishedAt: Date | null;
@@ -73,6 +74,7 @@ export interface StoryEvidenceItem {
 export interface StoryDetail extends StoryFeedItem {
   evidence: StoryEvidenceItem[];
   analysis: {
+    translatedTitle: string | null;
     factualSummary: string;
     whyItMatters: string | null;
     underlyingLogic: string | null;
@@ -137,6 +139,8 @@ async function hydrateFeedRows(
     db
       .select({
         storyId: storyAnalyses.storyId,
+        translatedTitle: storyAnalyses.translatedTitle,
+        factualSummary: storyAnalyses.factualSummary,
         whyItMatters: storyAnalyses.whyItMatters,
         createdAt: storyAnalyses.createdAt,
       })
@@ -158,7 +162,14 @@ async function hydrateFeedRows(
     if (!assessmentByItem.has(row.itemId))
       assessmentByItem.set(row.itemId, row);
   }
-  const analysisByStory = new Map<string, { whyItMatters: string | null }>();
+  const analysisByStory = new Map<
+    string,
+    {
+      translatedTitle: string | null;
+      factualSummary: string;
+      whyItMatters: string | null;
+    }
+  >();
   for (const row of analysisRows) {
     if (!analysisByStory.has(row.storyId))
       analysisByStory.set(row.storyId, row);
@@ -177,6 +188,8 @@ async function hydrateFeedRows(
     const analysis = analysisByStory.get(row.id);
     return {
       ...row,
+      translatedTitle: analysis?.translatedTitle ?? null,
+      factualSummary: analysis?.factualSummary ?? row.factualSummary,
       matchedSignals: assessment?.matchedSignals ?? [],
       assessmentReasons: assessment?.reasons ?? [],
       whyItMatters: analysis?.whyItMatters ?? null,
@@ -358,6 +371,7 @@ export const getStoryDetail = cache(
 
     const [analysis] = await db
       .select({
+        translatedTitle: storyAnalyses.translatedTitle,
         factualSummary: storyAnalyses.factualSummary,
         whyItMatters: storyAnalyses.whyItMatters,
         underlyingLogic: storyAnalyses.underlyingLogic,

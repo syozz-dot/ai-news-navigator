@@ -12,13 +12,15 @@
     "ingest:all": "tsx src/ingest-all.ts",
     "ingest:due": "tsx src/ingest-due.ts",
     "sources:health": "tsx src/source-health-cli.ts",
-    "process:stories": "tsx src/process-stories.ts"
+    "process:stories": "tsx src/process-stories.ts",
+    "analyze:stories": "tsx src/analyze-stories.ts"
   },
   "dependencies": {
     "@ai-news-navigator/database": "workspace:*",
     "@ai-news-navigator/intelligence": "workspace:*",
     "@ai-news-navigator/pipeline": "workspace:*",
     "@ai-news-navigator/sources": "workspace:*",
+    "ai": "^6.0.0",
     "drizzle-orm": "^0.45.2"
   }
 }

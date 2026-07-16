@@ -1,0 +1,1 @@
+ALTER TABLE "story_analyses" ADD COLUMN "translated_title" text;

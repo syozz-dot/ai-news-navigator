@@ -64,13 +64,18 @@ Facts and interpretation remain separate:
 - Stories retain the current factual synthesis and ranking signals.
 - Story analyses retain model, provider, prompt version, evidence item IDs, confidence, product impact, and open questions.
 
+The scheduled refresh generates the analysis layer through Vercel AI Gateway
+after ingestion and deterministic Story processing. English source records stay
+as the immutable evidence index, while Chinese display titles and interpretation
+are stored separately for reader-facing presentation.
+
 No LLM provider is referenced by the domain model.
 
 The first processing stage is deterministic. Versioned item assessments score AI centrality and product impact before relevant items enter conservative Story clustering. Cluster assignments retain their algorithm version, similarity, and reasons so later embedding-based versions can be compared rather than silently replacing history.
 
 ## Next architecture steps
 
-1. Select a hosted PostgreSQL and job runtime, then invoke `ingest:due` on a fixed cadence.
+1. Monitor hosted PostgreSQL, cron, and AI Gateway usage on the current runtime.
 2. Add alert thresholds and a small operational health view.
 3. Evaluate the deterministic relevance and clustering baseline against a labeled fixture set.
 4. Add embedding-assisted candidate retrieval and a merge/split review queue.

@@ -383,6 +383,7 @@ export const storyAnalyses = pgTable(
     storyId: uuid("story_id")
       .notNull()
       .references(() => stories.id, { onDelete: "cascade" }),
+    translatedTitle: text("translated_title"),
     factualSummary: text("factual_summary").notNull(),
     whyItMatters: text("why_it_matters"),
     underlyingLogic: text("underlying_logic"),

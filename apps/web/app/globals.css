@@ -609,6 +609,14 @@ button {
   letter-spacing: -0.065em;
   line-height: 1.04;
 }
+
+.storyHero .storyOriginalTitle {
+  margin-top: 14px;
+  color: var(--ink-muted);
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
 .storyHero > p {
   max-width: 850px;
   margin: 27px 0 0;

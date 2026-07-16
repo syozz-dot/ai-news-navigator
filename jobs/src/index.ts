@@ -40,6 +40,18 @@ export {
 } from "./story-processing.js";
 export {
   runDueSourceIngestion,
+  runStoryAnalysis,
   runStoryProcessing,
   type DueSourceIngestionResult,
 } from "./scheduled-work.js";
+export {
+  createConfiguredStoryAnalyzer,
+  DEFAULT_STORY_ANALYSIS_MODEL,
+  PostgresStoryAnalysisProcessor,
+  STORY_ANALYSIS_PROMPT_VERSION,
+  VercelGatewayStoryAnalyzer,
+  type GeneratedStoryAnalysis,
+  type StoryAnalysisInput,
+  type StoryAnalysisResult,
+  type StoryAnalyzer,
+} from "./story-analysis.js";

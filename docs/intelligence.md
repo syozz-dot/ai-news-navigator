@@ -42,10 +42,27 @@ Each `story_items` assignment records similarity, clustering version, and match 
 
 The processing command holds an expiring global PostgreSQL job lease. This keeps two scheduler instances from creating parallel Story decisions while still recovering automatically after a crashed worker.
 
+## Chinese Story analysis
+
+Story interpretation runs as a separate evidence-bound generation stage after
+deterministic scoring and clustering:
+
+- Vercel AI Gateway uses deployment OIDC, so production does not need a
+  long-lived model-provider API key.
+- Original titles, URLs, excerpts, and evidence records remain unchanged.
+- Each analysis stores a Chinese display title, factual summary, significance,
+  underlying logic, product impact, opportunities, open questions, confidence,
+  model provenance, and the evidence item IDs used.
+- A Story is regenerated when its evidence changes or a new prompt version is
+  introduced.
+- Missing evidence produces empty fields or open questions instead of unsupported
+  conclusions.
+
 ## Current limitations
 
 - This stage is conservative lexical clustering, not embedding-based semantic clustering.
-- Story titles currently come from the first relevant item.
+- Original Story titles currently come from the first relevant item; generated
+  Chinese display titles are stored separately.
 - There is no automatic merge/split review queue yet.
 - Relevance signals are English-first, although title tokenization includes Chinese character bigrams.
 
