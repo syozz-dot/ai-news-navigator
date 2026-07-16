@@ -5,8 +5,9 @@
 - `pnpm ingest:due` synchronizes configured source definitions, evaluates schedules, and runs only due sources. This is the production scheduler entry point.
 - `pnpm ingest:all` forces an evaluation of every configured source while still respecting active leases. It is intended for manual backfills and smoke tests.
 - `pnpm sources:health` prints the current operational state and next-run time for every source as JSON.
+- `pnpm process:stories` assesses unprocessed items and creates or updates Stories in batches.
 
-No hosted cron is enabled yet. A deployment scheduler should invoke `pnpm ingest:due` on a short fixed cadence, such as every 15 minutes. The database remains the source of truth for whether each connector is actually due.
+No hosted cron is enabled yet. A deployment scheduler should invoke `pnpm ingest:due` followed by `pnpm process:stories` on a short fixed cadence, such as every 15 minutes. The database remains the source of truth for whether each connector is actually due.
 
 ## Health states
 

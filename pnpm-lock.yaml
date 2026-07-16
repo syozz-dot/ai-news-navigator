@@ -38,6 +38,9 @@ importers:
       '@ai-news-navigator/database':
         specifier: workspace:*
         version: link:../packages/database
+      '@ai-news-navigator/intelligence':
+        specifier: workspace:*
+        version: link:../packages/intelligence
       '@ai-news-navigator/pipeline':
         specifier: workspace:*
         version: link:../packages/pipeline
@@ -56,6 +59,12 @@ importers:
       postgres:
         specifier: ^3.4.9
         version: 3.4.9
+
+  packages/intelligence:
+    dependencies:
+      '@ai-news-navigator/sources':
+        specifier: workspace:*
+        version: link:../sources
 
   packages/pipeline:
     dependencies:

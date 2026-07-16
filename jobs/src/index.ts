@@ -33,3 +33,8 @@ export {
   type SourceOperationalState,
 } from "./source-health.js";
 export { acquireSourceLease, releaseSourceLease } from "./source-lease.js";
+export { acquireJobLease, releaseJobLease } from "./job-lease.js";
+export {
+  PostgresStoryProcessor,
+  type StoryProcessingResult,
+} from "./story-processing.js";

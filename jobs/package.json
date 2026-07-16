@@ -11,10 +11,12 @@
     "ingest:openai-news": "tsx src/ingest-openai-news.ts",
     "ingest:all": "tsx src/ingest-all.ts",
     "ingest:due": "tsx src/ingest-due.ts",
-    "sources:health": "tsx src/source-health-cli.ts"
+    "sources:health": "tsx src/source-health-cli.ts",
+    "process:stories": "tsx src/process-stories.ts"
   },
   "dependencies": {
     "@ai-news-navigator/database": "workspace:*",
+    "@ai-news-navigator/intelligence": "workspace:*",
     "@ai-news-navigator/pipeline": "workspace:*",
     "@ai-news-navigator/sources": "workspace:*",
     "drizzle-orm": "^0.45.2"

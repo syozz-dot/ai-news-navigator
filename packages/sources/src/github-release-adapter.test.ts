@@ -15,9 +15,9 @@ const project = {
 const feed = `<?xml version="1.0" encoding="UTF-8"?>
   <feed xmlns="http://www.w3.org/2005/Atom">
     <entry>
-      <id>tag:github.com,2008:Repository/1/v2.0.0-rc1</id>
+      <id>tag:github.com,2008:Repository/1/v2.0.0rc1</id>
       <updated>2026-07-16T03:30:00Z</updated>
-      <link rel="alternate" href="https://github.com/example/ai-runtime/releases/tag/v2.0.0-rc1" />
+      <link rel="alternate" href="https://github.com/example/ai-runtime/releases/tag/v2.0.0rc1" />
       <title>v2.0.0</title>
       <content type="html">&lt;p&gt;Release candidate&lt;/p&gt;</content>
     </entry>

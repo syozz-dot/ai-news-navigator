@@ -10,7 +10,7 @@
   "scripts": {
     "check": "pnpm -r check",
     "test": "vitest run",
-    "test:integration": "vitest run jobs/src/postgres-ingestion-repository.integration.test.ts",
+    "test:integration": "vitest run --no-file-parallelism jobs/src/*.integration.test.ts",
     "test:watch": "vitest",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -19,7 +19,8 @@
     "ingest:openai-news": "pnpm --filter @ai-news-navigator/jobs ingest:openai-news",
     "ingest:all": "pnpm --filter @ai-news-navigator/jobs ingest:all",
     "ingest:due": "pnpm --filter @ai-news-navigator/jobs ingest:due",
-    "sources:health": "pnpm --filter @ai-news-navigator/jobs sources:health"
+    "sources:health": "pnpm --filter @ai-news-navigator/jobs sources:health",
+    "process:stories": "pnpm --filter @ai-news-navigator/jobs process:stories"
   },
   "devDependencies": {
     "@types/node": "^26.1.1",

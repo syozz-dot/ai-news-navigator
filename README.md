@@ -42,6 +42,7 @@ apps/web             Public website and API (planned)
 packages/database    PostgreSQL schema and database client
 packages/sources     Source contracts, registry, and RSS adapters
 packages/pipeline    Normalization, exact deduplication, and ingestion
+packages/intelligence Explainable relevance scoring and Story clustering
 jobs                 PostgreSQL repository and ingestion entry points
 docs                 Product and engineering documentation
 ```
@@ -63,12 +64,15 @@ pnpm db:migrate
 pnpm check
 pnpm test
 pnpm ingest:due
+pnpm process:stories
 pnpm sources:health
 ```
 
 Configured sources currently include [OpenAI News](https://openai.com/news/), arXiv AI categories, and stable releases from Ollama and vLLM. See [docs/sources.md](docs/sources.md) for source policy and adapter behavior.
 
 Scheduling is database-driven with exponential failure backoff and per-source leases. See [docs/operations.md](docs/operations.md) for commands, health semantics, and the deployment boundary.
+
+Relevant items are grouped with a conservative, versioned clustering baseline. See [docs/intelligence.md](docs/intelligence.md) for scoring signals, merge guards, and current limitations.
 
 ## Product principles
 

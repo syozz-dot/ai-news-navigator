@@ -15,6 +15,20 @@
       "when": 1784174536487,
       "tag": "0001_chunky_annihilus",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784182916886,
+      "tag": "0002_demonic_storm",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1784183243584,
+      "tag": "0003_narrow_titanium_man",
+      "breakpoints": true
     }
   ]
 }

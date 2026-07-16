@@ -66,9 +66,12 @@ Facts and interpretation remain separate:
 
 No LLM provider is referenced by the domain model.
 
+The first processing stage is deterministic. Versioned item assessments score AI centrality and product impact before relevant items enter conservative Story clustering. Cluster assignments retain their algorithm version, similarity, and reasons so later embedding-based versions can be compared rather than silently replacing history.
+
 ## Next architecture steps
 
 1. Select a hosted PostgreSQL and job runtime, then invoke `ingest:due` on a fixed cadence.
 2. Add alert thresholds and a small operational health view.
-3. Add relevance filtering and semantic story clustering after exact deduplication.
-4. Add more official sources only when their provenance and content policy are explicit.
+3. Evaluate the deterministic relevance and clustering baseline against a labeled fixture set.
+4. Add embedding-assisted candidate retrieval and a merge/split review queue.
+5. Add more official sources only when their provenance and content policy are explicit.

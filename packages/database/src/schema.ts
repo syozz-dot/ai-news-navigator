@@ -162,6 +162,17 @@ export const sourceRuns = pgTable(
   ],
 );
 
+export const jobLeases = pgTable("job_leases", {
+  key: varchar("key", { length: 128 }).primaryKey(),
+  owner: varchar("owner", { length: 128 }).notNull(),
+  leaseExpiresAt: timestamp("lease_expires_at", {
+    withTimezone: true,
+  }).notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
 export const items = pgTable(
   "items",
   {
@@ -224,6 +235,37 @@ export const items = pgTable(
   ],
 );
 
+export const itemAssessments = pgTable(
+  "item_assessments",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    itemId: uuid("item_id")
+      .notNull()
+      .references(() => items.id, { onDelete: "cascade" }),
+    scorerVersion: varchar("scorer_version", { length: 64 }).notNull(),
+    relevanceScore: real("relevance_score").notNull(),
+    aiCentralityScore: real("ai_centrality_score").notNull(),
+    productImpactScore: real("product_impact_score").notNull(),
+    isRelevant: boolean("is_relevant").notNull(),
+    matchedSignals: text("matched_signals").array().default([]).notNull(),
+    reasons: text("reasons").array().default([]).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex("item_assessments_item_scorer_unique").on(
+      table.itemId,
+      table.scorerVersion,
+    ),
+    index("item_assessments_scorer_relevant_idx").on(
+      table.scorerVersion,
+      table.isRelevant,
+      table.relevanceScore,
+    ),
+  ],
+);
+
 export const stories = pgTable(
   "stories",
   {
@@ -270,6 +312,8 @@ export const storyItems = pgTable(
       .references(() => items.id, { onDelete: "cascade" }),
     role: storyItemRoleEnum("role").default("supporting").notNull(),
     similarity: real("similarity"),
+    clusterVersion: varchar("cluster_version", { length: 64 }),
+    matchReasons: text("match_reasons").array().default([]).notNull(),
     addedAt: timestamp("added_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -372,8 +416,11 @@ export type Source = typeof sources.$inferSelect;
 export type NewSource = typeof sources.$inferInsert;
 export type SourceRun = typeof sourceRuns.$inferSelect;
 export type NewSourceRun = typeof sourceRuns.$inferInsert;
+export type JobLease = typeof jobLeases.$inferSelect;
 export type Item = typeof items.$inferSelect;
 export type NewItem = typeof items.$inferInsert;
+export type ItemAssessment = typeof itemAssessments.$inferSelect;
+export type NewItemAssessment = typeof itemAssessments.$inferInsert;
 export type Story = typeof stories.$inferSelect;
 export type NewStory = typeof stories.$inferInsert;
 export type Topic = typeof topics.$inferSelect;

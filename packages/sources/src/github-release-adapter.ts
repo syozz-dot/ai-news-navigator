@@ -29,9 +29,10 @@ function slug(value: string): string {
 }
 
 function isPrerelease(item: RawSourceItem): boolean {
-  return /(?:^|[./_-])(alpha|beta|rc|preview|pre)\d*(?:$|[./_-])/i.test(
-    item.url,
-  );
+  const tag = item.url.split("/tag/")[1];
+  return tag
+    ? /(?:alpha|beta|rc|preview|pre)[.-]?\d*$/i.test(decodeURIComponent(tag))
+    : false;
 }
 
 export function createGitHubReleaseSourceDefinition(
