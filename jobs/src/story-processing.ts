@@ -24,7 +24,6 @@ import {
   inArray,
   isNull,
   lte,
-  sql,
 } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 
@@ -243,14 +242,46 @@ export class PostgresStoryProcessor {
             .from(storyItems)
             .innerJoin(items, eq(storyItems.itemId, items.id))
             .where(eq(storyItems.storyId, input.match.storyId));
+          const [currentStory] = await transaction
+            .select({
+              firstPublishedAt: stories.firstPublishedAt,
+              lastPublishedAt: stories.lastPublishedAt,
+              relevanceScore: stories.relevanceScore,
+            })
+            .from(stories)
+            .where(eq(stories.id, input.match.storyId))
+            .limit(1);
+          if (!currentStory) {
+            throw new Error("Matched Story no longer exists");
+          }
+          const independentSourceCount = Number(sourceCount?.count ?? 1);
+          const firstPublishedAt = currentStory.firstPublishedAt
+            ? new Date(
+                Math.min(
+                  currentStory.firstPublishedAt.getTime(),
+                  input.publishedAt.getTime(),
+                ),
+              )
+            : input.publishedAt;
+          const lastPublishedAt = currentStory.lastPublishedAt
+            ? new Date(
+                Math.max(
+                  currentStory.lastPublishedAt.getTime(),
+                  input.publishedAt.getTime(),
+                ),
+              )
+            : input.publishedAt;
           await transaction
             .update(stories)
             .set({
-              firstPublishedAt: sql`least(coalesce(${stories.firstPublishedAt}, ${input.publishedAt}), ${input.publishedAt})`,
-              lastPublishedAt: sql`greatest(coalesce(${stories.lastPublishedAt}, ${input.publishedAt}), ${input.publishedAt})`,
-              independentSourceCount: sourceCount?.count ?? 1,
-              relevanceScore: sql`greatest(coalesce(${stories.relevanceScore}, 0), ${input.assessment.relevanceScore})`,
-              status: (sourceCount?.count ?? 1) >= 2 ? "confirmed" : "emerging",
+              firstPublishedAt,
+              lastPublishedAt,
+              independentSourceCount,
+              relevanceScore: Math.max(
+                currentStory.relevanceScore ?? 0,
+                input.assessment.relevanceScore,
+              ),
+              status: independentSourceCount >= 2 ? "confirmed" : "emerging",
               updatedAt: new Date(),
             })
             .where(eq(stories.id, input.match.storyId));
