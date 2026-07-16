@@ -1,0 +1,10 @@
+packages:
+  - apps/*
+  - packages/*
+  - jobs
+
+allowBuilds:
+  esbuild: true
+
+onlyBuiltDependencies:
+  - esbuild

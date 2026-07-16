@@ -1,0 +1,21 @@
+import type { SourceAdapter } from "@ai-news-navigator/sources";
+import {
+  runIngestion,
+  type IngestionLogger,
+  type IngestionRepository,
+  type SourceRunResult,
+} from "@ai-news-navigator/pipeline";
+
+export interface SourceJobDependencies {
+  sourceId: string;
+  adapter: SourceAdapter;
+  repository: IngestionRepository;
+  logger: IngestionLogger;
+  since?: Date;
+}
+
+export async function runSourceJob(
+  dependencies: SourceJobDependencies,
+): Promise<SourceRunResult> {
+  return runIngestion(dependencies);
+}

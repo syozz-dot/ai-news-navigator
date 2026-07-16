@@ -1,0 +1,16 @@
+{
+  "name": "@ai-news-navigator/jobs",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ai-news-navigator/pipeline": "workspace:*",
+    "@ai-news-navigator/sources": "workspace:*"
+  }
+}
