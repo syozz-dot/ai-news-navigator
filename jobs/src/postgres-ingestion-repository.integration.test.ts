@@ -14,6 +14,9 @@ import {
   PostgresIngestionRepository,
   syncSourceDefinition,
 } from "./postgres-ingestion-repository.js";
+import { listSourceHealth } from "./source-health.js";
+import { acquireSourceLease, releaseSourceLease } from "./source-lease.js";
+import { executeConfiguredSource } from "./source-executor.js";
 
 const databaseUrl = process.env.TEST_DATABASE_URL;
 const describeWithDatabase = databaseUrl ? describe : describe.skip;
@@ -139,6 +142,116 @@ describeWithDatabase("PostgresIngestionRepository", () => {
       status: "degraded",
       consecutiveFailures: 1,
       lastFailureAt: finishedAt,
+    });
+  });
+
+  it("backs off failed sources and prevents overlapping leases", async () => {
+    const beforeRetry = await listSourceHealth(
+      db,
+      new Date("2026-07-16T04:30:00Z"),
+    );
+    expect(beforeRetry.find((source) => source.id === sourceId)).toMatchObject({
+      operationalState: "failing",
+      isDue: false,
+      nextRunAt: new Date("2026-07-16T05:00:03Z"),
+    });
+
+    const retryAt = new Date("2026-07-16T05:00:03Z");
+    await expect(
+      acquireSourceLease({
+        db,
+        sourceId,
+        owner: "integration-worker-1",
+        now: retryAt,
+        durationMs: 10 * 60_000,
+      }),
+    ).resolves.toBe(true);
+    await expect(
+      acquireSourceLease({
+        db,
+        sourceId,
+        owner: "integration-worker-2",
+        now: retryAt,
+      }),
+    ).resolves.toBe(false);
+
+    const whileLeased = await listSourceHealth(
+      db,
+      new Date("2026-07-16T05:01:00Z"),
+    );
+    expect(whileLeased.find((source) => source.id === sourceId)).toMatchObject({
+      isDue: false,
+      isLeased: true,
+    });
+
+    await expect(
+      releaseSourceLease({
+        db,
+        sourceId,
+        owner: "integration-worker-2",
+        now: retryAt,
+      }),
+    ).resolves.toBe(false);
+    await expect(
+      releaseSourceLease({
+        db,
+        sourceId,
+        owner: "integration-worker-1",
+        now: retryAt,
+      }),
+    ).resolves.toBe(true);
+
+    const released = await listSourceHealth(db, retryAt);
+    expect(released.find((source) => source.id === sourceId)).toMatchObject({
+      isDue: true,
+      isLeased: false,
+    });
+  });
+
+  it("releases the lease after a configured source completes", async () => {
+    const execution = await executeConfiguredSource({
+      db,
+      source: {
+        id: sourceId,
+        lastSuccessAt: new Date("2026-07-16T03:00:05Z"),
+      },
+      configured: {
+        definition,
+        adapter: {
+          key: definition.connectorKey,
+          fetch: async () => [
+            {
+              externalId: "official-2",
+              contentType: "news",
+              title: "Another official update",
+              url: "https://example.com/news/official-2",
+              publishedAt: "2026-07-16T05:00:00Z",
+            },
+          ],
+        },
+      },
+      repository,
+      logger: {
+        info: () => undefined,
+        warn: () => undefined,
+        error: () => undefined,
+      },
+      leaseOwner: "integration-executor",
+    });
+
+    expect(execution).toMatchObject({
+      status: "completed",
+      result: { status: "succeeded", storedCount: 1 },
+    });
+    const [source] = await db
+      .select()
+      .from(sources)
+      .where(eq(sources.id, sourceId));
+    expect(source).toMatchObject({
+      status: "active",
+      consecutiveFailures: 0,
+      leaseOwner: null,
+      leaseExpiresAt: null,
     });
   });
 });

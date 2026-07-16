@@ -25,3 +25,11 @@ export {
   syncSourceDefinition,
   type SyncedSource,
 } from "./postgres-ingestion-repository.js";
+export {
+  evaluateSourceHealth,
+  listSourceHealth,
+  type SourceHealth,
+  type SourceHealthInput,
+  type SourceOperationalState,
+} from "./source-health.js";
+export { acquireSourceLease, releaseSourceLease } from "./source-lease.js";

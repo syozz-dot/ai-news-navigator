@@ -54,6 +54,8 @@ The ingestion package depends on interfaces rather than a concrete database impl
 
 The `jobs` workspace supplies the PostgreSQL implementation. Completing a source run updates both immutable run metrics and the source's current health. Exact conflicts on canonical URL or source external ID are counted as duplicates.
 
+Scheduling is also owned by `jobs`. It derives due time from the latest completed attempt, applies bounded exponential backoff after failures, and takes an expiring PostgreSQL lease before network work begins. Hosted cron remains a deployment concern and only needs to invoke the due-source command.
+
 ## Intelligence boundary
 
 Facts and interpretation remain separate:
@@ -66,7 +68,7 @@ No LLM provider is referenced by the domain model.
 
 ## Next architecture steps
 
-1. Add source health read queries, alert thresholds, and retry policy.
-2. Add scheduled execution and deployment configuration.
+1. Select a hosted PostgreSQL and job runtime, then invoke `ingest:due` on a fixed cadence.
+2. Add alert thresholds and a small operational health view.
 3. Add relevance filtering and semantic story clustering after exact deduplication.
 4. Add more official sources only when their provenance and content policy are explicit.

@@ -62,10 +62,13 @@ pnpm db:generate
 pnpm db:migrate
 pnpm check
 pnpm test
-pnpm ingest:all
+pnpm ingest:due
+pnpm sources:health
 ```
 
 Configured sources currently include [OpenAI News](https://openai.com/news/), arXiv AI categories, and stable releases from Ollama and vLLM. See [docs/sources.md](docs/sources.md) for source policy and adapter behavior.
+
+Scheduling is database-driven with exponential failure backoff and per-source leases. See [docs/operations.md](docs/operations.md) for commands, health semantics, and the deployment boundary.
 
 ## Product principles
 

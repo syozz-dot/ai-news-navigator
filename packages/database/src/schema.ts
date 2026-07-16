@@ -113,6 +113,8 @@ export const sources = pgTable(
     lastSuccessAt: timestamp("last_success_at", { withTimezone: true }),
     lastFailureAt: timestamp("last_failure_at", { withTimezone: true }),
     consecutiveFailures: integer("consecutive_failures").default(0).notNull(),
+    leaseOwner: varchar("lease_owner", { length: 128 }),
+    leaseExpiresAt: timestamp("lease_expires_at", { withTimezone: true }),
     metadata: jsonb("metadata")
       .$type<Record<string, unknown>>()
       .default({})
@@ -127,6 +129,7 @@ export const sources = pgTable(
   (table) => [
     uniqueIndex("sources_slug_unique").on(table.slug),
     index("sources_status_idx").on(table.status),
+    index("sources_status_lease_idx").on(table.status, table.leaseExpiresAt),
     index("sources_connector_key_idx").on(table.connectorKey),
   ],
 );

@@ -7,11 +7,14 @@ import {
   openAiNewsSource,
 } from "@ai-news-navigator/sources";
 
-import { runSourceJob } from "./index.js";
 import {
   PostgresIngestionRepository,
   syncSourceDefinition,
 } from "./postgres-ingestion-repository.js";
+import {
+  createLeaseOwner,
+  executeConfiguredSource,
+} from "./source-executor.js";
 
 const logger: IngestionLogger = {
   info: (message, context) => console.info(message, context ?? {}),
@@ -22,19 +25,24 @@ const logger: IngestionLogger = {
 const { client, db } = createDatabase();
 
 try {
-  const source = await syncSourceDefinition(db, openAiNewsSource);
-  const overlapSince = source.lastSuccessAt
-    ? new Date(source.lastSuccessAt.getTime() - 24 * 60 * 60 * 1_000)
-    : undefined;
-  const result = await runSourceJob({
-    sourceId: source.id,
+  const configured = {
+    definition: openAiNewsSource,
     adapter: createOpenAiNewsAdapter(),
+  };
+  const source = await syncSourceDefinition(db, configured.definition);
+  const execution = await executeConfiguredSource({
+    db,
+    source,
+    configured,
     repository: new PostgresIngestionRepository(db),
     logger,
-    ...(overlapSince ? { since: overlapSince } : {}),
+    leaseOwner: createLeaseOwner(),
   });
 
-  if (result.status === "failed") {
+  if (
+    execution.status === "completed" &&
+    execution.result.status === "failed"
+  ) {
     process.exitCode = 1;
   }
 } finally {
