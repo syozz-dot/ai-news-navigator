@@ -77,6 +77,8 @@ Relevant items are grouped with a conservative, versioned clustering baseline. S
 
 The web app reads only persisted PostgreSQL data. It does not inject sample news when the database is missing or empty. The Story feed is available at `/`, Story details at `/stories/[slug]`, and JSON endpoints under `/api/stories` and `/api/health/sources`.
 
+Production web deployments run committed Drizzle migrations before the Next.js build. When available, migrations use `DATABASE_URL_UNPOOLED`; application requests continue to use the pooled `DATABASE_URL`.
+
 ## Product principles
 
 - Facts and AI interpretation are stored and presented separately.

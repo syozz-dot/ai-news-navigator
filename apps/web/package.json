@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev --webpack",
-    "build": "next build --webpack",
+    "build": "node scripts/prepare-database.mjs && next build --webpack",
     "start": "next start",
     "check": "tsc --noEmit"
   },
