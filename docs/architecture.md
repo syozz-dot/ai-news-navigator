@@ -67,7 +67,8 @@ Facts and interpretation remain separate:
 The scheduled refresh generates the analysis layer through Vercel AI Gateway
 after ingestion and deterministic Story processing. English source records stay
 as the immutable evidence index, while Chinese display titles and interpretation
-are stored separately for reader-facing presentation.
+are stored separately for reader-facing presentation. A second daily analysis
+cron backfills missing or newly stale analyses without repeating current ones.
 
 No LLM provider is referenced by the domain model.
 
