@@ -1216,7 +1216,7 @@ button {
 }
 
 .headerInner {
-  width: min(100% - var(--space-8), 1440px);
+  width: min(calc(100% - var(--space-8)), 1440px);
 }
 
 .brand {
@@ -1285,7 +1285,7 @@ button {
 }
 
 .dailyBrief {
-  width: min(100% - var(--space-8), 1440px);
+  width: min(calc(100% - var(--space-8)), 1440px);
   min-height: 336px;
   margin: 0 auto;
   display: grid;
@@ -1344,6 +1344,7 @@ button {
 
 .focusPanel {
   min-width: 0;
+  overflow: hidden;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 136px;
   background: var(--focus-blue);
@@ -1377,6 +1378,7 @@ button {
   color: color-mix(in srgb, var(--light-ink) 90%, transparent);
   font-size: 14px;
   line-height: 1.75;
+  overflow-wrap: anywhere;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
 }
@@ -1414,6 +1416,7 @@ button {
   color: color-mix(in srgb, var(--light-ink) 80%, transparent);
   font-size: 12px;
   line-height: 1.6;
+  overflow-wrap: anywhere;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
@@ -1506,7 +1509,7 @@ button {
 }
 
 .contentShell {
-  width: min(100% - var(--space-8), 1440px);
+  width: min(calc(100% - var(--space-8)), 1440px);
   grid-template-columns: minmax(0, 9fr) minmax(280px, 3fr);
   gap: 0;
 }
@@ -1674,6 +1677,7 @@ button {
   font-weight: 600;
   letter-spacing: -0.018em;
   line-height: 1.45;
+  overflow-wrap: anywhere;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
@@ -1707,6 +1711,7 @@ button {
   color: var(--ink-secondary);
   font-size: 12px;
   line-height: 1.7;
+  overflow-wrap: anywhere;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
@@ -1811,7 +1816,7 @@ button {
   .headerInner,
   .dailyBrief,
   .contentShell {
-    width: min(100% - var(--space-7), 100%);
+    width: calc(100% - var(--space-7));
   }
 
   .primaryNav {
@@ -1886,7 +1891,11 @@ button {
   .headerInner,
   .dailyBrief,
   .contentShell {
-    width: min(100% - var(--space-6), 100%);
+    width: calc(100% - var(--space-6));
+  }
+
+  .githubLink {
+    display: none;
   }
 
   .brand {
@@ -2019,6 +2028,7 @@ button {
   }
 
   .storyMetaCells {
+    min-width: 0;
     gap: var(--space-3);
     overflow: hidden;
   }
