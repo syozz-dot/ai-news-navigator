@@ -169,9 +169,11 @@ export default async function Home({
             <div className="feedSort">
               <h2 id="feed-title">情报流</h2>
               <span>
-                {activeType
-                  ? `${contentTypeLabels[activeType]} · 按相关度排序`
-                  : "按相关度排序"}
+                {activeType === "product"
+                  ? "产品视角 · 按产品影响排序"
+                  : activeType
+                    ? `${contentTypeLabels[activeType]} · 按相关度排序`
+                    : "按相关度排序"}
               </span>
             </div>
           </div>

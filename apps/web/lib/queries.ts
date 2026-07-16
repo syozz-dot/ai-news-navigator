@@ -190,12 +190,24 @@ export const getStoryFeed = cache(
   async (contentType?: ContentType, limit = 30) => {
     const { db } = getDatabaseConnection();
     const primaryItems = alias(items, "primary_items");
-    const where = contentType
+    const productSignalScore = sql<number>`coalesce((
+      select max(${itemAssessments.productImpactScore})
+      from ${itemAssessments}
+      where ${itemAssessments.itemId} = ${primaryItems.id}
+        and ${itemAssessments.isRelevant} = true
+    ), 0)`;
+    const productView = contentType === "product";
+    const where = productView
       ? and(
           inArray(stories.status, publicStoryStatuses),
-          eq(primaryItems.contentType, contentType),
+          sql`${productSignalScore} >= 0.25`,
         )
-      : inArray(stories.status, publicStoryStatuses);
+      : contentType
+        ? and(
+            inArray(stories.status, publicStoryStatuses),
+            eq(primaryItems.contentType, contentType),
+          )
+        : inArray(stories.status, publicStoryStatuses);
 
     const [baseRows, totals] = await Promise.all([
       db
@@ -223,6 +235,7 @@ export const getStoryFeed = cache(
         .leftJoin(sources, eq(primaryItems.sourceId, sources.id))
         .where(where)
         .orderBy(
+          ...(productView ? [desc(productSignalScore)] : []),
           desc(
             sql`coalesce(${stories.overallScore}, ${stories.relevanceScore}, 0)`,
           ),
