@@ -38,3 +38,8 @@ export {
   PostgresStoryProcessor,
   type StoryProcessingResult,
 } from "./story-processing.js";
+export {
+  runDueSourceIngestion,
+  runStoryProcessing,
+  type DueSourceIngestionResult,
+} from "./scheduled-work.js";

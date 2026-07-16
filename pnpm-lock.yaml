@@ -38,6 +38,12 @@ importers:
       '@ai-news-navigator/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@ai-news-navigator/jobs':
+        specifier: workspace:*
+        version: link:../../jobs
+      '@ai-news-navigator/pipeline':
+        specifier: workspace:*
+        version: link:../../packages/pipeline
       '@fontsource-variable/jetbrains-mono':
         specifier: ^5.2.8
         version: 5.2.8

@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@ai-news-navigator/database": "workspace:*",
+    "@ai-news-navigator/jobs": "workspace:*",
+    "@ai-news-navigator/pipeline": "workspace:*",
     "@fontsource-variable/jetbrains-mono": "^5.2.8",
     "@fontsource-variable/manrope": "^5.2.8",
     "@phosphor-icons/react": "^2.1.10",
