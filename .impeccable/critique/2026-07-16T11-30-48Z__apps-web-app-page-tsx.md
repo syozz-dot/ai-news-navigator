@@ -6,23 +6,24 @@ p1_count: 3
 timestamp: 2026-07-16T11-30-48Z
 slug: apps-web-app-page-tsx
 ---
+
 Method: dual-agent (A: impeccable_assessment_a · B: impeccable_assessment_b)
 
 ## Design Health Score
 
-| # | Heuristic | Score | Key Issue |
-|---|---|---:|---|
-| 1 | Visibility of System Status | 3/4 | 有加载、信源与分析状态，但缺少刷新节奏、当前导航态和清晰的异常信源表达。 |
-| 2 | Match System / Real World | 2/4 | 中文框架友好，但首条论文仍要求非技术用户先理解英文标题与 ACRR、E3 等术语。 |
-| 3 | User Control and Freedom | 2/4 | 有筛选与主题切换，但没有明确排序、搜索、快速查看全部或移动端导航替代。 |
-| 4 | Consistency and Standards | 2/4 | 当前页面内部尚算一致，但与已确认的 pine / mineral-blue 设计系统明显分叉。 |
-| 5 | Error Prevention | 2/4 | 无效筛选能安全回退，但统计口径不一致可能让用户做出错误判断。 |
-| 6 | Recognition Rather Than Recall | 3/4 | 主要信息可见，但“相关度 71”和部分状态的决策含义没有解释。 |
-| 7 | Flexibility and Efficiency | 1/4 | 150 条 Story 缺少搜索、显式排序、密度控制和快捷导航。 |
-| 8 | Aesthetic and Minimalist Design | 2/4 | 克制但未真正脱水：大 Hero 抢占优先级，首条摘要仍是一整面文字墙。 |
-| 9 | Error Recovery | 3/4 | 错误与空状态有说明，但筛选空结果缺少直接恢复操作。 |
-| 10 | Help and Documentation | 2/4 | “阅读边界”有效，但相关度算法、更新频率和新鲜度说明不足。 |
-| **Total** |  | **22/40** | **Acceptable — 有基础，但需要显著优化。** |
+| #         | Heuristic                       |     Score | Key Issue                                                                  |
+| --------- | ------------------------------- | --------: | -------------------------------------------------------------------------- |
+| 1         | Visibility of System Status     |       3/4 | 有加载、信源与分析状态，但缺少刷新节奏、当前导航态和清晰的异常信源表达。   |
+| 2         | Match System / Real World       |       2/4 | 中文框架友好，但首条论文仍要求非技术用户先理解英文标题与 ACRR、E3 等术语。 |
+| 3         | User Control and Freedom        |       2/4 | 有筛选与主题切换，但没有明确排序、搜索、快速查看全部或移动端导航替代。     |
+| 4         | Consistency and Standards       |       2/4 | 当前页面内部尚算一致，但与已确认的 pine / mineral-blue 设计系统明显分叉。  |
+| 5         | Error Prevention                |       2/4 | 无效筛选能安全回退，但统计口径不一致可能让用户做出错误判断。               |
+| 6         | Recognition Rather Than Recall  |       3/4 | 主要信息可见，但“相关度 71”和部分状态的决策含义没有解释。                  |
+| 7         | Flexibility and Efficiency      |       1/4 | 150 条 Story 缺少搜索、显式排序、密度控制和快捷导航。                      |
+| 8         | Aesthetic and Minimalist Design |       2/4 | 克制但未真正脱水：大 Hero 抢占优先级，首条摘要仍是一整面文字墙。           |
+| 9         | Error Recovery                  |       3/4 | 错误与空状态有说明，但筛选空结果缺少直接恢复操作。                         |
+| 10        | Help and Documentation          |       2/4 | “阅读边界”有效，但相关度算法、更新频率和新鲜度说明不足。                   |
+| **Total** |                                 | **22/40** | **Acceptable — 有基础，但需要显著优化。**                                  |
 
 ## Anti-Patterns Verdict
 
