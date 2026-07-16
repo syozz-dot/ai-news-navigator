@@ -1,5 +1,6 @@
 import "@fontsource-variable/jetbrains-mono/index.css";
 import "@fontsource-variable/manrope/index.css";
+import "@fontsource-variable/noto-serif-sc/index.css";
 import type { Metadata } from "next";
 
 import { SiteHeader } from "../components/site-header";

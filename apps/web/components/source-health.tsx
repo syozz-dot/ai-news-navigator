@@ -26,7 +26,10 @@ export function SourceHealth({ sources }: { sources: SourceHealthItem[] }) {
           {sources.map((source) => {
             const healthy = source.status === "active";
             return (
-              <div className="sourceItem" key={source.id}>
+              <div
+                className={healthy ? "sourceItem" : "sourceItem degraded"}
+                key={source.id}
+              >
                 <div className="sourceIdentity">
                   {healthy ? (
                     <CheckCircle aria-hidden="true" size={16} weight="fill" />
@@ -42,9 +45,14 @@ export function SourceHealth({ sources }: { sources: SourceHealthItem[] }) {
                     </span>
                   </div>
                 </div>
-                <span className="sourceTime">
-                  {formatDateTime(source.lastSuccessAt)}
-                </span>
+                <div className="sourceStatusMeta">
+                  <span className="sourceState">
+                    {healthy ? "正常" : "异常"}
+                  </span>
+                  <span className="sourceTime">
+                    {formatDateTime(source.lastSuccessAt)}
+                  </span>
+                </div>
               </div>
             );
           })}

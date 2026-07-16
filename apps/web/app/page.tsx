@@ -1,4 +1,4 @@
-import { ArrowDown } from "@phosphor-icons/react/dist/ssr";
+import { ArrowDown, ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 
 import { EmptyFeed } from "../components/empty-feed";
@@ -51,32 +51,96 @@ export default async function Home({
   const confirmed = items.filter(
     (story) => story.status === "confirmed",
   ).length;
+  const activeSources = sourceHealth.filter(
+    (source) => source.status === "active",
+  ).length;
+  const focusStory = items[0];
+  const focusSummary =
+    focusStory?.factualSummary ??
+    focusStory?.excerpt ??
+    "今日焦点正在等待第一条可验证的 Story。";
+  const focusFact =
+    focusStory?.assessmentReasons[0] ??
+    (focusStory
+      ? `这条进展来自 ${focusStory.sourceName ?? "当前信源"}，目前关联 ${focusStory.independentSourceCount} 个独立信源。`
+      : focusSummary);
+  const focusImplication =
+    focusStory?.whyItMatters ??
+    "产品启示尚未生成，先保留事实与信源边界，不补写结论。";
 
   return (
     <main>
-      <section className="feedIntro">
-        <div className="introDate">{formatCalendarDate()}</div>
-        <div className="introCopy">
-          <h1>值得判断的 AI 进展</h1>
-          <p>从原始资讯到可验证的 Story。先看事实，再判断影响。</p>
+      <section className="dailyBrief" aria-labelledby="brief-title">
+        <div className="briefLead">
+          <div className="introDate">{formatCalendarDate()}</div>
+          <h1 id="brief-title">今日 AI 简报</h1>
+          <div className="briefMonogram" aria-hidden="true">
+            <span />N<span />
+          </div>
+          <p>先看今天发生了什么，再理解它对产品和业务的影响。</p>
         </div>
-        <dl className="introMetrics">
+
+        {focusStory ? (
+          <Link className="focusPanel" href={`/stories/${focusStory.slug}`}>
+            <div className="focusContent">
+              <h2>今日焦点</h2>
+              <p className="focusSummary">{focusSummary}</p>
+              <dl className="focusNotes">
+                <div>
+                  <dt>发生了什么</dt>
+                  <dd>{focusFact}</dd>
+                </div>
+                <div>
+                  <dt>产品启示</dt>
+                  <dd>{focusImplication}</dd>
+                </div>
+              </dl>
+            </div>
+            <div className="focusScore">
+              <span>相关度</span>
+              <strong>
+                {Math.round(
+                  (focusStory.overallScore ?? focusStory.relevanceScore ?? 0) *
+                    100,
+                )}
+              </strong>
+              <small>
+                类别：
+                {focusStory.contentType
+                  ? contentTypeLabels[focusStory.contentType]
+                  : "情报"}
+              </small>
+              <small>来源：{focusStory.sourceName ?? "未知信源"}</small>
+              <span className="focusLinkHint">
+                阅读 Story <ArrowRight aria-hidden="true" size={15} />
+              </span>
+            </div>
+          </Link>
+        ) : (
+          <div className="focusPanel focusPanelEmpty">
+            <div className="focusContent">
+              <h2>今日焦点</h2>
+              <p className="focusEmptyTitle">等待第一条可验证的 Story</p>
+              <p className="focusSummary">{focusSummary}</p>
+            </div>
+          </div>
+        )}
+
+        <dl className="briefStats">
           <div>
-            <dt>当前 Story</dt>
+            <dt>今日 Story</dt>
             <dd>{total}</dd>
           </div>
           <div>
-            <dt>多源确认</dt>
-            <dd>{confirmed}</dd>
+            <dt>信源健康</dt>
+            <dd>
+              {activeSources}
+              <span> / {sourceHealth.length}</span>
+            </dd>
           </div>
           <div>
-            <dt>可用信源</dt>
-            <dd>
-              {
-                sourceHealth.filter((source) => source.status === "active")
-                  .length
-              }
-            </dd>
+            <dt>本页多源确认</dt>
+            <dd>{confirmed}</dd>
           </div>
         </dl>
       </section>
@@ -84,14 +148,6 @@ export default async function Home({
       <div className="contentShell">
         <section className="feedColumn" aria-labelledby="feed-title">
           <div className="feedToolbar">
-            <div>
-              <h2 id="feed-title">情报流</h2>
-              <span>
-                {activeType
-                  ? contentTypeLabels[activeType]
-                  : "按相关度与时间排序"}
-              </span>
-            </div>
             <nav className="filterNav" aria-label="内容筛选">
               {filters.map((filter) => {
                 const active =
@@ -108,14 +164,39 @@ export default async function Home({
                 );
               })}
             </nav>
+            <div className="feedSort">
+              <h2 id="feed-title">情报流</h2>
+              <span>
+                {activeType
+                  ? `${contentTypeLabels[activeType]} · 按相关度排序`
+                  : "按相关度排序"}
+              </span>
+            </div>
           </div>
+
+          {items.length > 0 ? (
+            <div className="storyColumns" aria-hidden="true">
+              <span>#</span>
+              <span>来源</span>
+              <span>类型</span>
+              <span>时间</span>
+              <span>Story</span>
+              <span>产品意义</span>
+              <span>相关度</span>
+            </div>
+          ) : null}
 
           {items.length === 0 ? (
             <EmptyFeed filtered={Boolean(activeType)} />
           ) : (
             <div className="storyList">
               {items.map((story, index) => (
-                <StoryRow story={story} index={index} key={story.id} />
+                <StoryRow
+                  story={story}
+                  index={index}
+                  key={story.id}
+                  lead={index === 0}
+                />
               ))}
             </div>
           )}
@@ -147,6 +228,7 @@ export default async function Home({
               </li>
             </ol>
           </section>
+          <div className="refreshCadence">每日 09:15 自动更新</div>
         </aside>
       </div>
     </main>

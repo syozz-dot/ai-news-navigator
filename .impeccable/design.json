@@ -1,0 +1,240 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-16T10:11:29Z",
+  "title": "Design System: AI News Navigator",
+  "extensions": {
+    "colorMeta": {
+      "brand-pine": {
+        "role": "primary",
+        "displayName": "Deep Pine Navigation",
+        "canonical": "#0B3D2E",
+        "tonalRamp": [
+          "oklch(18% 0.045 160)",
+          "oklch(25% 0.055 160)",
+          "oklch(33% 0.065 160)",
+          "oklch(43% 0.065 160)",
+          "oklch(55% 0.055 160)",
+          "oklch(68% 0.04 160)",
+          "oklch(82% 0.025 160)",
+          "oklch(94% 0.01 160)"
+        ]
+      },
+      "focus-mineral-blue": {
+        "role": "secondary",
+        "displayName": "Mineral Blue Focus",
+        "canonical": "#2E4057",
+        "tonalRamp": [
+          "oklch(18% 0.035 250)",
+          "oklch(25% 0.045 250)",
+          "oklch(33% 0.05 250)",
+          "oklch(43% 0.05 250)",
+          "oklch(55% 0.045 250)",
+          "oklch(68% 0.035 250)",
+          "oklch(82% 0.02 250)",
+          "oklch(94% 0.008 250)"
+        ]
+      },
+      "signal-green": {
+        "role": "primary",
+        "displayName": "Signal Green",
+        "canonical": "#1F6B4E",
+        "tonalRamp": [
+          "oklch(18% 0.055 158)",
+          "oklch(25% 0.07 158)",
+          "oklch(33% 0.085 158)",
+          "oklch(43% 0.09 158)",
+          "oklch(55% 0.08 158)",
+          "oklch(68% 0.06 158)",
+          "oklch(82% 0.035 158)",
+          "oklch(94% 0.012 158)"
+        ]
+      },
+      "canvas": {
+        "role": "neutral",
+        "displayName": "Cool Canvas",
+        "canonical": "#F2F4F2",
+        "tonalRamp": [
+          "oklch(15% 0.006 150)",
+          "oklch(27% 0.006 150)",
+          "oklch(40% 0.006 150)",
+          "oklch(54% 0.006 150)",
+          "oklch(68% 0.006 150)",
+          "oklch(80% 0.006 150)",
+          "oklch(90% 0.006 150)",
+          "oklch(97% 0.006 150)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Near-Black Ink",
+        "canonical": "#161A17",
+        "tonalRamp": [
+          "oklch(15% 0.008 150)",
+          "oklch(24% 0.008 150)",
+          "oklch(34% 0.008 150)",
+          "oklch(46% 0.008 150)",
+          "oklch(59% 0.008 150)",
+          "oklch(72% 0.008 150)",
+          "oklch(85% 0.008 150)",
+          "oklch(95% 0.008 150)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Editorial Display",
+        "purpose": "Page-level daily brief headings only."
+      },
+      "headline": {
+        "displayName": "Focus Headline",
+        "purpose": "The single daily focus and Story-detail headings."
+      },
+      "title": {
+        "displayName": "Story Title",
+        "purpose": "Scannable Story headlines in the feed."
+      },
+      "body": {
+        "displayName": "Reading Body",
+        "purpose": "Plain-language summaries and product interpretation."
+      },
+      "label": {
+        "displayName": "Product Label",
+        "purpose": "Navigation, filters, and explicit content boundaries."
+      },
+      "mono": {
+        "displayName": "Evidence Mono",
+        "purpose": "Scores, timestamps, indices, and source counts."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "state-standard",
+        "value": "160ms cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "Hover, focus, and selected-state feedback."
+      },
+      {
+        "name": "press-fast",
+        "value": "100ms cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "Pressed-state translation only."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "mobile",
+        "value": "767px"
+      },
+      {
+        "name": "tablet",
+        "value": "1023px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Site Header",
+      "kind": "nav",
+      "refersTo": "site-header",
+      "description": "Deep-pine product anchor with an underlined active route.",
+      "html": "<nav class=\"ds-header\"><span class=\"ds-header__mark\">N</span><strong>AI News Navigator</strong><a class=\"ds-header__active\" href=\"#\">情报流</a><a href=\"#\">论文</a><a href=\"#\">发布</a><a href=\"#\">信源</a></nav>",
+      "css": ".ds-header { min-height: 68px; display: flex; align-items: center; gap: 28px; padding: 0 24px; background: #0B3D2E; color: #F1F5F2; font: 600 13px 'Manrope', sans-serif; } .ds-header__mark { width: 30px; height: 30px; display: grid; place-items: center; border: 1px solid #F1F5F2; font: 600 15px 'Noto Serif SC', serif; } .ds-header strong { margin-right: auto; font-size: 15px; } .ds-header a { position: relative; color: inherit; text-decoration: none; opacity: .78; } .ds-header a:hover, .ds-header a:focus-visible { opacity: 1; } .ds-header a:focus-visible { outline: 2px solid #F1F5F2; outline-offset: 5px; } .ds-header__active { opacity: 1 !important; } .ds-header__active::after { content: ''; position: absolute; left: 0; right: 0; bottom: -12px; height: 2px; background: #F1F5F2; }"
+    },
+    {
+      "name": "Daily Focus",
+      "kind": "custom",
+      "refersTo": "focus-panel",
+      "description": "Mineral-blue editorial interpretation for the single highest-priority Story.",
+      "html": "<section class=\"ds-focus\"><div><h2>今日焦点</h2><p>把今天最重要的 AI 进展压缩成事实与产品启示。</p><dl><dt>发生了什么</dt><dd>事实摘要保持可追溯。</dd><dt>产品启示</dt><dd>解释它对产品和业务的影响。</dd></dl></div><aside><span>相关度</span><strong>71</strong></aside></section>",
+      "css": ".ds-focus { display: grid; grid-template-columns: 1fr 120px; gap: 32px; padding: 32px; background: #2E4057; color: #F1F5F2; } .ds-focus h2 { margin: 0; font: 600 34px/1.2 'Noto Serif SC', serif; letter-spacing: -.025em; } .ds-focus p { max-width: 64ch; margin: 16px 0 22px; font: 450 15px/1.7 'Manrope', sans-serif; } .ds-focus dl { display: grid; grid-template-columns: 100px 1fr; gap: 10px 16px; margin: 0; padding-top: 18px; border-top: 1px solid rgba(241,245,242,.35); } .ds-focus dt { font-weight: 700; } .ds-focus dd { margin: 0; opacity: .82; } .ds-focus aside { display: flex; flex-direction: column; gap: 8px; padding-left: 24px; border-left: 1px solid rgba(241,245,242,.45); } .ds-focus aside strong { font: 500 46px/1 'JetBrains Mono', monospace; }"
+    },
+    {
+      "name": "Filter Tabs",
+      "kind": "nav",
+      "refersTo": "filter-selected",
+      "description": "Text-first content filters with a restrained underline state.",
+      "html": "<nav class=\"ds-filters\"><a class=\"ds-filters__active\" href=\"#\">全部</a><a href=\"#\">新闻</a><a href=\"#\">论文</a><a href=\"#\">产品</a><a href=\"#\">发布</a></nav>",
+      "css": ".ds-filters { display: flex; gap: 32px; padding: 18px 0; background: #F2F4F2; font: 650 12px 'Manrope', sans-serif; } .ds-filters a { position: relative; padding: 8px 0; color: #515B54; text-decoration: none; } .ds-filters a:hover, .ds-filters a:focus-visible { color: #161A17; } .ds-filters a:focus-visible { outline: 2px solid #1F6B4E; outline-offset: 4px; } .ds-filters__active { color: #161A17 !important; } .ds-filters__active::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: #0B3D2E; }"
+    },
+    {
+      "name": "Story Row",
+      "kind": "custom",
+      "refersTo": "story-row-selected",
+      "description": "A selected Story row balancing source metadata, headline, interpretation, and score.",
+      "html": "<article class=\"ds-story\"><span class=\"ds-story__index\">01</span><div><p class=\"ds-story__meta\">arXiv AI · 论文 · 17:59</p><h3>Do AI Agents Know When a Task Is Simple?</h3><p>用一句话说明这项进展对产品意味着什么。</p></div><strong class=\"ds-story__score\">71</strong></article>",
+      "css": ".ds-story { display: grid; grid-template-columns: 36px 1fr 64px; gap: 18px; align-items: start; padding: 24px 16px; border-bottom: 1px solid #CBD2CC; background: #E9EDE9; color: #161A17; } .ds-story__index, .ds-story__score { font-family: 'JetBrains Mono', monospace; } .ds-story__index { color: #737D76; font-size: 11px; } .ds-story__meta { margin: 0 0 8px; color: #737D76; font: 500 11px 'Manrope', sans-serif; } .ds-story h3 { margin: 0; font: 600 22px/1.35 'Noto Serif SC', serif; letter-spacing: -.02em; } .ds-story div > p:last-child { max-width: 65ch; margin: 10px 0 0; color: #515B54; font: 450 14px/1.65 'Manrope', sans-serif; } .ds-story__score { color: #1F6B4E; font-size: 28px; font-weight: 500; } .ds-story:focus-within { outline: 2px solid #1F6B4E; outline-offset: -2px; }"
+    },
+    {
+      "name": "Source Health",
+      "kind": "custom",
+      "description": "Compact trust status for a first-party source.",
+      "html": "<div class=\"ds-source\"><span class=\"ds-source__status\" aria-hidden=\"true\"></span><div><strong>OpenAI News</strong><small>一手信源</small></div><time>08:41</time></div>",
+      "css": ".ds-source { display: grid; grid-template-columns: 10px 1fr auto; gap: 10px; align-items: start; padding: 12px 0; border-bottom: 1px solid #CBD2CC; color: #161A17; font: 500 12px 'Manrope', sans-serif; } .ds-source__status { width: 9px; height: 9px; margin-top: 4px; border-radius: 50%; background: #1F6B4E; } .ds-source div { display: flex; flex-direction: column; gap: 2px; } .ds-source small, .ds-source time { color: #737D76; font-size: 10px; } .ds-source time { font-family: 'JetBrains Mono', monospace; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Editor's Signal Desk",
+    "overview": "AI News Navigator should feel like the desk of an editor who has already removed the noise before the reader arrives. It combines the authority and pacing of an independent technology publication with the precision of a product tool: a compact daily briefing, one clearly framed focus, and a dense but calm Story queue.\n\nThe visual system is flat, two-tone, and structural. Deep pine anchors navigation and product identity; mineral blue is reserved for the single daily focus. Cool neutral surfaces, strong typography, and fine rules organize everything else. It explicitly rejects information waterfalls, academic-database density, and generic AI-summary cards without evidence.",
+    "keyCharacteristics": [
+      "Editorial hierarchy without marketing theatrics.",
+      "Scan-first lists followed by clearly separated interpretation.",
+      "Two authoritative dark colors, each with one role.",
+      "Flat tonal layering, fine dividers, and no decorative elevation.",
+      "Plain-language Chinese with evidence always nearby."
+    ],
+    "rules": [
+      {
+        "name": "The Two-Color Authority Rule",
+        "body": "Deep pine belongs to navigation; mineral blue belongs to the daily focus. Never place the two colors in competing content panels.",
+        "section": "colors"
+      },
+      {
+        "name": "The Ten-Percent Signal Rule",
+        "body": "Signal green marks state and action, not decoration. If green draws the eye before the Story title, it is overused.",
+        "section": "colors"
+      },
+      {
+        "name": "The No-Warm-Paper Rule",
+        "body": "The canvas stays cool and nearly chroma-free. Warmth comes from editorial voice, never from a cream background.",
+        "section": "colors"
+      },
+      {
+        "name": "The Editorial-Only Serif Rule",
+        "body": "Serif is reserved for page headings, the daily focus, and Story titles. Controls, navigation, labels, and body copy remain sans-serif.",
+        "section": "typography"
+      },
+      {
+        "name": "The Distilled Paragraph Rule",
+        "body": "A feed explanation should fit within three lines on desktop. Longer evidence belongs on the Story page.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat-by-Default Rule",
+        "body": "Every surface is flat at rest. Hover and selection use color or a one-pixel line, never lift.",
+        "section": "elevation"
+      },
+      {
+        "name": "The One-Pixel Structure Rule",
+        "body": "Dividers remain one pixel and use the structural-line tokens. Thick colored side stripes are prohibited.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do make the scan-first Story queue the largest continuous surface on the homepage.",
+      "Do reserve deep pine for navigation and mineral blue for the single daily focus.",
+      "Do use plain-language Chinese to translate technical material without deleting the evidence needed for judgment.",
+      "Do maintain WCAG 2.2 AA contrast, keyboard focus, semantic reading order, and reduced-motion behavior.",
+      "Do keep body copy at 14–16px and interpretation lines within a comfortable 65–75 character measure.",
+      "Do keep facts, deterministic signals, and generated analysis visually and verbally distinct."
+    ],
+    "donts": [
+      "Don't become an information waterfall optimized for volume.",
+      "Don't imitate an academic database that assumes specialist knowledge.",
+      "Don't create generic AI-summary cards without traceable evidence.",
+      "Don't copy the visual style of aihot.virxact.com; it is a functional reference only.",
+      "Don't use warm cream, sand, parchment, or beige as the canvas.",
+      "Don't use gradients, glassmorphism, neon, decorative charts, wide soft shadows, or nested cards.",
+      "Don't use giant hero metrics, filled filter pills, or a large marketing hero on a product reading surface.",
+      "Don't let display serif typography leak into controls, navigation, or metadata."
+    ]
+  }
+}

@@ -14,7 +14,9 @@ export function SiteHeader() {
           <span className="brandName">AI News Navigator</span>
         </Link>
         <nav className="primaryNav" aria-label="主导航">
-          <Link href="/">情报流</Link>
+          <Link className="active" href="/" aria-current="page">
+            情报流
+          </Link>
           <Link href="/?type=paper">论文</Link>
           <Link href="/?type=release">发布</Link>
           <Link href="/#source-health">信源</Link>

@@ -11,3 +11,8 @@ coverage/
 .DS_Store
 .idea/
 .vscode/
+
+# Local Codex/Impeccable tooling; keep design artifacts below versioned.
+.agents/
+.codex/
+.impeccable/live/sessions/
