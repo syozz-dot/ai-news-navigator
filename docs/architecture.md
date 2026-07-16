@@ -66,7 +66,7 @@ No LLM provider is referenced by the domain model.
 
 ## Next architecture steps
 
-1. Add arXiv and selected official-blog source definitions.
-2. Add source health read queries, alert thresholds, and retry policy.
-3. Add scheduled execution and deployment configuration.
-4. Add semantic story clustering only after exact deduplication is stable.
+1. Add source health read queries, alert thresholds, and retry policy.
+2. Add scheduled execution and deployment configuration.
+3. Add relevance filtering and semantic story clustering after exact deduplication.
+4. Add more official sources only when their provenance and content policy are explicit.

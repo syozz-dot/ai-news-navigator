@@ -16,7 +16,8 @@
     "format:check": "prettier --check .",
     "db:generate": "pnpm --filter @ai-news-navigator/database db:generate",
     "db:migrate": "pnpm --filter @ai-news-navigator/database db:migrate",
-    "ingest:openai-news": "pnpm --filter @ai-news-navigator/jobs ingest:openai-news"
+    "ingest:openai-news": "pnpm --filter @ai-news-navigator/jobs ingest:openai-news",
+    "ingest:all": "pnpm --filter @ai-news-navigator/jobs ingest:all"
   },
   "devDependencies": {
     "@types/node": "^26.1.1",

@@ -10,7 +10,7 @@ It is designed to answer three questions:
 
 ## Project status
 
-V2 foundation work is in progress. PostgreSQL-backed ingestion and the first official RSS source are implemented; story clustering and the public product remain ahead.
+V2 foundation work is in progress. PostgreSQL-backed ingestion now covers official news, arXiv AI papers, and selected first-party GitHub releases; story clustering and the public product remain ahead.
 
 ## Architecture
 
@@ -62,10 +62,10 @@ pnpm db:generate
 pnpm db:migrate
 pnpm check
 pnpm test
-pnpm ingest:openai-news
+pnpm ingest:all
 ```
 
-The first configured source is [OpenAI News](https://openai.com/news/). See [docs/sources.md](docs/sources.md) for source policy and adapter behavior.
+Configured sources currently include [OpenAI News](https://openai.com/news/), arXiv AI categories, and stable releases from Ollama and vLLM. See [docs/sources.md](docs/sources.md) for source policy and adapter behavior.
 
 ## Product principles
 

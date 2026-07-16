@@ -8,7 +8,8 @@
   },
   "scripts": {
     "check": "tsc --noEmit",
-    "ingest:openai-news": "tsx src/ingest-openai-news.ts"
+    "ingest:openai-news": "tsx src/ingest-openai-news.ts",
+    "ingest:all": "tsx src/ingest-all.ts"
   },
   "dependencies": {
     "@ai-news-navigator/database": "workspace:*",

@@ -15,6 +15,26 @@ Source definitions are code-reviewed configuration. Each definition records prov
 
 The first run accepts at most 50 of the newest feed entries. Later runs use a 24-hour overlap around the previous successful run and rely on exact URL/external-ID deduplication. The overlap prevents delayed or backfilled feed entries from being skipped.
 
+### arXiv AI
+
+- Homepage: <https://arxiv.org/>
+- API: <https://export.arxiv.org/api/query>
+- Query: `cs.AI OR cs.CL OR cs.LG`, newest submissions first
+- Classification: primary paper repository
+- Schedule target: every 60 minutes
+- Content policy: store paper metadata and abstract; do not fetch or store PDF full text
+
+The adapter distinguishes the original `published` timestamp from `updated`, preserves all authors and categories in metadata, and exposes the PDF as evidence metadata. It can retrieve up to five 100-entry pages, waiting three seconds between API requests, and stops once it crosses the previous-run checkpoint.
+
+### GitHub releases
+
+Configured repositories:
+
+- [Ollama](https://github.com/ollama/ollama/releases) — [Atom feed](https://github.com/ollama/ollama/releases.atom)
+- [vLLM](https://github.com/vllm-project/vllm/releases) — [Atom feed](https://github.com/vllm-project/vllm/releases.atom)
+
+These are first-party project release records. RC, alpha, beta, preview, and pre-release tags are filtered out by default. GitHub's Atom feed supplies `updated` rather than a dedicated publication field, so the timestamp is explicitly stored with `inferred` confidence.
+
 ## Adapter behavior
 
 The generic RSS adapter supports RSS 2.0 and Atom entry shapes. It:
@@ -23,5 +43,6 @@ The generic RSS adapter supports RSS 2.0 and Atom entry shapes. It:
 - leaves missing or invalid publication timestamps unknown rather than replacing them with fetch time;
 - filters incrementally only when a valid source timestamp exists;
 - strips markup from descriptions used as excerpts;
+- can derive a bounded excerpt from Atom content for release feeds;
 - makes full-content storage an explicit per-source choice;
 - fails loudly on HTTP errors so source health can become degraded.

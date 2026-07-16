@@ -17,6 +17,9 @@ export interface RssSourceAdapterOptions {
   language?: string;
   maxItems?: number;
   includeContent?: boolean;
+  useContentAsExcerpt?: boolean;
+  maxExcerptCharacters?: number;
+  datedConfidence?: "exact" | "inferred";
   timeoutMs?: number;
   userAgent?: string;
   fetchImpl?: typeof fetch;
@@ -169,6 +172,9 @@ export class RssSourceAdapter implements SourceAdapter {
       | "contentType"
       | "maxItems"
       | "includeContent"
+      | "useContentAsExcerpt"
+      | "maxExcerptCharacters"
+      | "datedConfidence"
       | "timeoutMs"
       | "userAgent"
     >
@@ -187,6 +193,12 @@ export class RssSourceAdapter implements SourceAdapter {
     if (options.maxItems !== undefined && options.maxItems < 1) {
       throw new Error("RSS maxItems must be at least 1");
     }
+    if (
+      options.maxExcerptCharacters !== undefined &&
+      options.maxExcerptCharacters < 1
+    ) {
+      throw new Error("RSS maxExcerptCharacters must be at least 1");
+    }
 
     this.key = options.key;
     this.#options = {
@@ -194,6 +206,9 @@ export class RssSourceAdapter implements SourceAdapter {
       contentType: options.contentType,
       maxItems: options.maxItems ?? 50,
       includeContent: options.includeContent ?? false,
+      useContentAsExcerpt: options.useContentAsExcerpt ?? false,
+      maxExcerptCharacters: options.maxExcerptCharacters ?? 2_000,
+      datedConfidence: options.datedConfidence ?? "exact",
       timeoutMs: options.timeoutMs ?? 15_000,
       userAgent:
         options.userAgent ??
@@ -247,7 +262,13 @@ export class RssSourceAdapter implements SourceAdapter {
       const fullContent = textValue(entry.encoded ?? entry.content);
       const categories = categoryValues(entry.category);
       const externalId = textValue(entry.guid ?? entry.id);
-      const excerpt = htmlToText(summary);
+      const excerptText = htmlToText(
+        summary ??
+          (this.#options.useContentAsExcerpt ? fullContent : undefined),
+      );
+      const excerpt = excerptText
+        ? excerptText.slice(0, this.#options.maxExcerptCharacters).trim()
+        : undefined;
       const author = authorValue(entry);
 
       items.push({
@@ -262,7 +283,9 @@ export class RssSourceAdapter implements SourceAdapter {
         ...(author ? { author } : {}),
         ...(this.#options.language ? { language: this.#options.language } : {}),
         ...(publishedAt ? { publishedAt } : {}),
-        publicationTimeConfidence: publishedAt ? "exact" : "unknown",
+        publicationTimeConfidence: publishedAt
+          ? this.#options.datedConfidence
+          : "unknown",
         metadata: {
           feedUrl: this.#options.feedUrl,
           categories,

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:arxiv="http://arxiv.org/schemas/atom">
+  <id>https://arxiv.org/api/test</id>
+  <title>arXiv Query</title>
+  <entry>
+    <id>http://arxiv.org/abs/2607.14049v1</id>
+    <title>
+      Deep Interaction: An Efficient Human-AI Interaction Method
+    </title>
+    <updated>2026-07-15T18:00:00Z</updated>
+    <published>2026-07-15T17:16:43Z</published>
+    <link href="https://arxiv.org/abs/2607.14049v1" rel="alternate" type="text/html" />
+    <link href="https://arxiv.org/pdf/2607.14049v1" rel="related" type="application/pdf" title="pdf" />
+    <summary>A paper about efficient human-AI interaction.</summary>
+    <category term="cs.AI" />
+    <category term="cs.CL" />
+    <arxiv:primary_category term="cs.AI" />
+    <arxiv:comment>12 pages</arxiv:comment>
+    <author><name>Hefeng Zhou</name></author>
+    <author><name>Jinxuan Zhang</name></author>
+    <author><name>Jiong Lou</name></author>
+    <author><name>Yuxin Liu</name></author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2607.00001v1</id>
+    <title>Older AI paper</title>
+    <updated>2026-07-01T12:00:00Z</updated>
+    <published>2026-07-01T12:00:00Z</published>
+    <link href="https://arxiv.org/abs/2607.00001v1" rel="alternate" type="text/html" />
+    <summary>An older paper.</summary>
+    <category term="cs.LG" />
+    <arxiv:primary_category term="cs.LG" />
+    <author><name>Example Author</name></author>
+  </entry>
+</feed>
