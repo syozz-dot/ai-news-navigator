@@ -8,7 +8,7 @@
     },
     {
       "path": "/api/cron/analyze",
-      "schedule": "0 13 * * *"
+      "schedule": "0 3 * * *"
     }
   ]
 }

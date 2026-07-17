@@ -36,6 +36,13 @@
       "when": 1784206419051,
       "tag": "0004_wandering_power_man",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1784258006880,
+      "tag": "0005_shocking_wildside",
+      "breakpoints": true
     }
   ]
 }

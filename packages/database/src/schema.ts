@@ -173,6 +173,31 @@ export const jobLeases = pgTable("job_leases", {
     .notNull(),
 });
 
+export const analysisRuns = pgTable(
+  "analysis_runs",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    status: varchar("status", { length: 32 }).default("running").notNull(),
+    configured: boolean("configured").default(false).notNull(),
+    acquired: boolean("acquired").default(false).notNull(),
+    provider: varchar("provider", { length: 64 }),
+    model: varchar("model", { length: 128 }),
+    attemptedCount: integer("attempted_count").default(0).notNull(),
+    generatedCount: integer("generated_count").default(0).notNull(),
+    skippedCount: integer("skipped_count").default(0).notNull(),
+    failedCount: integer("failed_count").default(0).notNull(),
+    errorMessages: text("error_messages").array().default([]).notNull(),
+    startedAt: timestamp("started_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    finishedAt: timestamp("finished_at", { withTimezone: true }),
+  },
+  (table) => [
+    index("analysis_runs_started_idx").on(table.startedAt),
+    index("analysis_runs_status_idx").on(table.status),
+  ],
+);
+
 export const items = pgTable(
   "items",
   {
@@ -418,6 +443,7 @@ export type NewSource = typeof sources.$inferInsert;
 export type SourceRun = typeof sourceRuns.$inferSelect;
 export type NewSourceRun = typeof sourceRuns.$inferInsert;
 export type JobLease = typeof jobLeases.$inferSelect;
+export type AnalysisRun = typeof analysisRuns.$inferSelect;
 export type Item = typeof items.$inferSelect;
 export type NewItem = typeof items.$inferInsert;
 export type ItemAssessment = typeof itemAssessments.$inferSelect;

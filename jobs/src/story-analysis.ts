@@ -49,6 +49,8 @@ export interface GeneratedStoryAnalysis {
 }
 
 export interface StoryAnalyzer {
+  readonly provider: string;
+  readonly model: string;
   analyze(input: StoryAnalysisInput): Promise<GeneratedStoryAnalysis>;
 }
 
@@ -57,6 +59,7 @@ export interface StoryAnalysisResult {
   generatedCount: number;
   skippedCount: number;
   failedCount: number;
+  errorMessages: string[];
 }
 
 interface GatewayAnalysisOutput {
@@ -157,6 +160,7 @@ ${JSON.stringify(evidence, null, 2)}
 }
 
 export class VercelGatewayStoryAnalyzer implements StoryAnalyzer {
+  readonly provider = "vercel-ai-gateway";
   readonly model: string;
 
   constructor(
@@ -207,7 +211,7 @@ export class VercelGatewayStoryAnalyzer implements StoryAnalyzer {
         .filter(Boolean)
         .slice(0, 4),
       confidence: Math.min(1, Math.max(0, output.confidence)),
-      provider: "vercel-ai-gateway",
+      provider: this.provider,
       model: this.model,
     };
   }
@@ -258,6 +262,7 @@ export class PostgresStoryAnalysisProcessor {
       generatedCount: 0,
       skippedCount: 0,
       failedCount: 0,
+      errorMessages: [],
     };
 
     for (let offset = 0; offset < pending.length; offset += concurrency) {
@@ -293,9 +298,16 @@ export class PostgresStoryAnalysisProcessor {
             result.generatedCount += 1;
           } catch (error) {
             result.failedCount += 1;
+            const errorMessage = describeAnalysisError(error);
+            if (
+              result.errorMessages.length < 5 &&
+              !result.errorMessages.includes(errorMessage)
+            ) {
+              result.errorMessages.push(errorMessage);
+            }
             this.logger.error("Story analysis generation failed", {
               storyId: story.id,
-              error: error instanceof Error ? error.message : String(error),
+              error: errorMessage,
             });
           }
         }),
@@ -362,4 +374,9 @@ export class PostgresStoryAnalysisProcessor {
       publishedAt: row.sourcePublishedAt ?? row.discoveredAt,
     }));
   }
+}
+
+function describeAnalysisError(error: unknown): string {
+  const message = error instanceof Error ? error.message : String(error);
+  return trimText(message, 1_000) || "Unknown Story analysis error";
 }

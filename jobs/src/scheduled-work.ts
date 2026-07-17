@@ -1,5 +1,6 @@
-import type { Database } from "@ai-news-navigator/database";
+import { analysisRuns, type Database } from "@ai-news-navigator/database";
 import type { IngestionLogger } from "@ai-news-navigator/pipeline";
+import { eq } from "drizzle-orm";
 
 import { createConfiguredSources } from "./configured-sources.js";
 import { acquireJobLease, releaseJobLease } from "./job-lease.js";
@@ -166,22 +167,62 @@ export async function runStoryAnalysis(input: {
   analyzer: StoryAnalyzer | null;
   batchSize?: number;
   concurrency?: number;
-}): Promise<StoryAnalysisResult & { acquired: boolean; configured: boolean }> {
+}): Promise<
+  StoryAnalysisResult & {
+    acquired: boolean;
+    configured: boolean;
+    runId: string;
+  }
+> {
   const totals: StoryAnalysisResult & {
     acquired: boolean;
     configured: boolean;
+    runId: string;
   } = {
     acquired: false,
     configured: input.analyzer !== null,
+    runId: "",
     attemptedCount: 0,
     generatedCount: 0,
     skippedCount: 0,
     failedCount: 0,
+    errorMessages: [],
   };
+  const [run] = await input.db
+    .insert(analysisRuns)
+    .values({
+      status: "running",
+      configured: totals.configured,
+      provider: input.analyzer?.provider ?? null,
+      model: input.analyzer?.model ?? null,
+    })
+    .returning({ id: analysisRuns.id });
+  if (!run) throw new Error("Story analysis run creation failed");
+  totals.runId = run.id;
+
+  const finishRun = async (status: string) => {
+    await input.db
+      .update(analysisRuns)
+      .set({
+        status,
+        configured: totals.configured,
+        acquired: totals.acquired,
+        attemptedCount: totals.attemptedCount,
+        generatedCount: totals.generatedCount,
+        skippedCount: totals.skippedCount,
+        failedCount: totals.failedCount,
+        errorMessages: totals.errorMessages,
+        finishedAt: new Date(),
+      })
+      .where(eq(analysisRuns.id, totals.runId));
+  };
+
   if (!input.analyzer) {
+    totals.errorMessages.push("AI Gateway credentials were unavailable");
     input.logger.warn(
       "Story analysis skipped because AI Gateway is unavailable",
     );
+    await finishRun("skipped");
     return totals;
   }
 
@@ -194,9 +235,11 @@ export async function runStoryAnalysis(input: {
     durationMs: 10 * 60_000,
   });
   if (!totals.acquired) {
+    totals.errorMessages.push("Another worker owned the Story analysis lease");
     input.logger.info(
       "Story analysis skipped because another worker owns the lease",
     );
+    await finishRun("skipped");
     return totals;
   }
 
@@ -211,8 +254,16 @@ export async function runStoryAnalysis(input: {
       input.concurrency ?? 5,
     );
     Object.assign(totals, result);
+    await finishRun(result.failedCount > 0 ? "partial" : "succeeded");
     input.logger.info("Story analysis finished", { ...totals });
     return totals;
+  } catch (error) {
+    totals.failedCount += 1;
+    totals.errorMessages.push(
+      error instanceof Error ? error.message.slice(0, 1_000) : String(error),
+    );
+    await finishRun("failed");
+    throw error;
   } finally {
     const released = await releaseJobLease({
       db: input.db,
