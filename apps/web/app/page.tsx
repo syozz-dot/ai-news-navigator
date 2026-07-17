@@ -22,7 +22,6 @@ const filters: Array<{ label: string; value?: ContentType }> = [
   { label: "全部" },
   { label: "新闻", value: "news" },
   { label: "论文", value: "paper" },
-  { label: "产品线索", value: "product" },
   { label: "发布", value: "release" },
 ];
 
@@ -77,6 +76,11 @@ export default async function Home({
     "当前没有足够证据支持产品影响判断。";
   const focusNoteLabel = focusStory?.whyItMatters ? "产品启示" : "规则线索";
   const focusTitle = focusStory?.translatedTitle ?? focusStory?.title;
+  const productView = activeType === "product";
+  const focusScore = productView
+    ? focusStory?.productImpactScore
+    : (focusStory?.overallScore ?? focusStory?.relevanceScore);
+  const scoreLabel = productView ? "产品信号" : "相关度";
 
   return (
     <main>
@@ -91,7 +95,10 @@ export default async function Home({
         </div>
 
         {focusStory ? (
-          <Link className="focusPanel" href={`/stories/${focusStory.slug}`}>
+          <Link
+            className="focusPanel"
+            href={`/stories/${focusStory.slug}${productView ? "?view=product" : ""}`}
+          >
             <div className="focusContent">
               <h2>今日焦点</h2>
               <h3
@@ -113,13 +120,8 @@ export default async function Home({
               </dl>
             </div>
             <div className="focusScore">
-              <span>相关度</span>
-              <strong>
-                {Math.round(
-                  (focusStory.overallScore ?? focusStory.relevanceScore ?? 0) *
-                    100,
-                )}
-              </strong>
+              <span>{scoreLabel}</span>
+              <strong>{Math.round((focusScore ?? 0) * 100)}</strong>
               <small>
                 类别：
                 {focusStory.contentType
@@ -180,17 +182,38 @@ export default async function Home({
                 );
               })}
             </nav>
-            <div className="feedSort">
-              <h2 id="feed-title">情报流</h2>
-              <span>
-                {activeType === "product"
-                  ? "产品线索 · 按产品影响信号排序"
-                  : activeType
-                    ? `${contentTypeLabels[activeType]} · 按相关度排序`
-                    : "按相关度排序"}
-              </span>
+            <div className="feedTools">
+              <div className="feedSort">
+                <h2 id="feed-title">情报流</h2>
+                <span>
+                  {productView
+                    ? "跨类型 · 按产品信号排序"
+                    : activeType
+                      ? `${contentTypeLabels[activeType]} · 按相关度排序`
+                      : "按相关度排序"}
+                </span>
+              </div>
+              <Link
+                className={
+                  productView ? "productViewToggle active" : "productViewToggle"
+                }
+                href={productView ? "/" : "/?type=product"}
+                aria-current={productView ? "page" : undefined}
+              >
+                <span>产品视角</span>
+                <small>{productView ? "退出" : "跨类型筛选"}</small>
+              </Link>
             </div>
           </div>
+
+          {productView ? (
+            <div className="productViewContext">
+              <strong>产品视角</strong>
+              <span>
+                从新闻、论文与发布中筛选产品影响信号；“类型”仍表示原始内容类别。
+              </span>
+            </div>
+          ) : null}
 
           {items.length > 0 ? (
             <div className="storyColumns" aria-hidden="true">
@@ -200,7 +223,7 @@ export default async function Home({
               <span>时间</span>
               <span>Story</span>
               <span>产品意义</span>
-              <span>相关度</span>
+              <span>{scoreLabel}</span>
             </div>
           ) : null}
 
@@ -214,6 +237,13 @@ export default async function Home({
                   index={index}
                   key={story.id}
                   lead={index === 0}
+                  scoreLabel={scoreLabel}
+                  {...(productView
+                    ? {
+                        displayScore: story.productImpactScore,
+                        detailHref: `/stories/${story.slug}?view=product`,
+                      }
+                    : {})}
                 />
               ))}
             </div>

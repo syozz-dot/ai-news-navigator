@@ -28,6 +28,7 @@ export interface StoryFeedItem {
   lastPublishedAt: Date | null;
   independentSourceCount: number;
   relevanceScore: number | null;
+  productImpactScore: number | null;
   overallScore: number | null;
   confidence: number | null;
   primaryItemId: string | null;
@@ -106,6 +107,7 @@ async function hydrateFeedRows(
     lastPublishedAt: Date | null;
     independentSourceCount: number;
     relevanceScore: number | null;
+    productImpactScore: number | null;
     overallScore: number | null;
     confidence: number | null;
     primaryItemId: string | null;
@@ -234,6 +236,7 @@ export const getStoryFeed = cache(
           lastPublishedAt: stories.lastPublishedAt,
           independentSourceCount: stories.independentSourceCount,
           relevanceScore: stories.relevanceScore,
+          productImpactScore: productSignalScore,
           overallScore: stories.overallScore,
           confidence: stories.confidence,
           primaryItemId: stories.primaryItemId,
@@ -291,6 +294,12 @@ export const getStoryDetail = cache(
   async (slug: string): Promise<StoryDetail | null> => {
     const { db } = getDatabaseConnection();
     const primaryItems = alias(items, "primary_items");
+    const productSignalScore = sql<number>`coalesce((
+      select max(${itemAssessments.productImpactScore})
+      from ${itemAssessments}
+      where ${itemAssessments.itemId} = ${primaryItems.id}
+        and ${itemAssessments.isRelevant} = true
+    ), 0)`;
     const [base] = await db
       .select({
         id: stories.id,
@@ -302,6 +311,7 @@ export const getStoryDetail = cache(
         lastPublishedAt: stories.lastPublishedAt,
         independentSourceCount: stories.independentSourceCount,
         relevanceScore: stories.relevanceScore,
+        productImpactScore: productSignalScore,
         overallScore: stories.overallScore,
         confidence: stories.confidence,
         primaryItemId: stories.primaryItemId,

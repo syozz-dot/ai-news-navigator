@@ -9,6 +9,7 @@ import { notFound } from "next/navigation";
 
 import {
   buildRuleDigest,
+  buildRuleSignalNote,
   contentTypeLabels,
   formatFullDateTime,
   formatScore,
@@ -36,14 +37,20 @@ export async function generateMetadata({
 
 export default async function StoryPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ view?: string }>;
 }) {
-  const { slug } = await params;
+  const [{ slug }, { view }] = await Promise.all([params, searchParams]);
   const story = await getStoryDetail(slug);
   if (!story) notFound();
 
-  const score = story.overallScore ?? story.relevanceScore;
+  const productView = view === "product";
+  const score = productView
+    ? story.productImpactScore
+    : (story.overallScore ?? story.relevanceScore);
+  const scoreLabel = productView ? "产品信号" : "相关度";
   const factualSummary =
     story.analysis?.factualSummary ??
     story.factualSummary ??
@@ -53,13 +60,17 @@ export default async function StoryPage({
   return (
     <main className="storyPage">
       <div className="storyDetailShell">
-        <Link className="backLink" href="/">
+        <Link className="backLink" href={productView ? "/?type=product" : "/"}>
           <ArrowLeft size={17} />
-          返回情报流
+          {productView ? "返回产品视角" : "返回情报流"}
         </Link>
         <header className="storyHero">
           <div className="storyHeroMeta">
+            {productView ? (
+              <span className="productLensTag">产品线索</span>
+            ) : null}
             <span>
+              {productView ? "原始类型：" : ""}
               {story.contentType
                 ? contentTypeLabels[story.contentType]
                 : "情报"}
@@ -82,7 +93,7 @@ export default async function StoryPage({
 
         <dl className="storyMetrics">
           <div>
-            <dt>相关度</dt>
+            <dt>{scoreLabel}</dt>
             <dd>{formatScore(score)}</dd>
           </div>
           <div>
@@ -101,6 +112,25 @@ export default async function StoryPage({
 
         <div className="analysisLayout">
           <article className="analysisBody">
+            {productView ? (
+              <section className="productLensIntro">
+                <h2>产品判断</h2>
+                {story.analysis?.productImpact ? (
+                  <p>{story.analysis.productImpact}</p>
+                ) : (
+                  <MissingAnalysis label="产品影响分析" />
+                )}
+                <div className="ruleBasis">
+                  <strong>入选依据</strong>
+                  <p>{buildRuleSignalNote(story.matchedSignals)}</p>
+                  <span>
+                    产品信号 {formatScore(story.productImpactScore)} ·
+                    仅用于筛选， 不把论文直接等同于产品机会。
+                  </span>
+                </div>
+              </section>
+            ) : null}
+
             <section>
               <h2>发生了什么</h2>
               {factualSummary ? (
@@ -126,9 +156,11 @@ export default async function StoryPage({
               </section>
             ) : null}
 
-            <section>
+            <section
+              className={productView ? "productOpportunitySection" : undefined}
+            >
               <h2>产品与商业机会</h2>
-              {story.analysis?.productImpact ? (
+              {!productView && story.analysis?.productImpact ? (
                 <p>{story.analysis.productImpact}</p>
               ) : null}
               {story.analysis?.productOpportunities.length ? (

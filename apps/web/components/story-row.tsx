@@ -19,12 +19,19 @@ export function StoryRow({
   story,
   index,
   lead = false,
+  displayScore,
+  scoreLabel = "相关度",
+  detailHref,
 }: {
   story: StoryFeedItem;
   index: number;
   lead?: boolean;
+  displayScore?: number | null;
+  scoreLabel?: string;
+  detailHref?: string;
 }) {
-  const score = story.overallScore ?? story.relevanceScore;
+  const score = displayScore ?? story.overallScore ?? story.relevanceScore;
+  const href = detailHref ?? `/stories/${story.slug}`;
   const implication = story.whyItMatters;
   const ruleDigest = buildRuleDigest(story);
   const displayTitle = story.translatedTitle ?? story.title;
@@ -49,7 +56,7 @@ export function StoryRow({
         </time>
       </div>
       <div className="storyHeadline">
-        <Link className="storyTitleLink" href={`/stories/${story.slug}`}>
+        <Link className="storyTitleLink" href={href}>
           <h2>{displayTitle}</h2>
         </Link>
         <div className="storySignals" aria-label="内容信号">
@@ -82,8 +89,8 @@ export function StoryRow({
       </div>
       <Link
         className="storyScoreLink"
-        href={`/stories/${story.slug}`}
-        aria-label={`阅读 ${displayTitle}，相关度 ${formatScore(score)}`}
+        href={href}
+        aria-label={`阅读 ${displayTitle}，${scoreLabel} ${formatScore(score)}`}
       >
         <span>{formatScore(score)}</span>
         <ArrowRight aria-hidden="true" size={18} weight="regular" />
