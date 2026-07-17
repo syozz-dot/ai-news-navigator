@@ -110,10 +110,6 @@ export default async function StoryPage({
             <dt>状态</dt>
             <dd>{storyStatusLabels[story.status]}</dd>
           </div>
-          <div>
-            <dt>分析</dt>
-            <dd>{story.analysis ? "已生成" : "未生成"}</dd>
-          </div>
         </dl>
 
         <div className="analysisLayout">

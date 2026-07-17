@@ -648,7 +648,7 @@ button {
 .storyMetrics {
   margin: 0;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   border-top: 1px solid var(--line-strong);
   border-bottom: 1px solid var(--line-strong);
 }
@@ -1182,12 +1182,10 @@ button {
     grid-template-columns: 1fr 1fr;
   }
   .storyMetrics div:nth-child(3) {
+    grid-column: 1 / -1;
     border-left: 0;
     border-top: 1px solid var(--line);
     padding-left: 0;
-  }
-  .storyMetrics div:nth-child(4) {
-    border-top: 1px solid var(--line);
   }
   .analysisLayout {
     padding-top: 48px;

@@ -1,8 +1,4 @@
-import {
-  ArrowRight,
-  CheckCircle,
-  Circle,
-} from "@phosphor-icons/react/dist/ssr";
+import { ArrowRight, CheckCircle } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 
 import type { StoryFeedItem } from "../lib/queries";
@@ -54,18 +50,10 @@ export function StoryRow({
         ) : (
           <p className="interpretationPending">尚无中文解读</p>
         )}
-        {story.hasAnalysis || story.status === "confirmed" ? (
+        {story.status === "confirmed" ? (
           <div className="storyEvidenceState">
-            {story.status === "confirmed" ? (
-              <CheckCircle aria-hidden="true" size={16} weight="fill" />
-            ) : (
-              <Circle aria-hidden="true" size={15} />
-            )}
-            <span>
-              {story.hasAnalysis
-                ? "中文解读已生成"
-                : storyStatusLabels[story.status]}
-            </span>
+            <CheckCircle aria-hidden="true" size={16} weight="fill" />
+            <span>{storyStatusLabels[story.status]}</span>
           </div>
         ) : null}
       </div>
