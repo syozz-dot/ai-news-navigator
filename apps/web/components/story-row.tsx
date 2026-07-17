@@ -7,10 +7,10 @@ import Link from "next/link";
 
 import type { StoryFeedItem } from "../lib/queries";
 import {
-  buildRuleDigest,
   contentTypeLabels,
   formatDateTime,
   formatScore,
+  selectFeedInterpretation,
   signalLabel,
   storyStatusLabels,
 } from "../lib/presentation";
@@ -25,12 +25,7 @@ export function StoryRow({
   lead?: boolean;
 }) {
   const score = story.overallScore ?? story.relevanceScore;
-  const implication = story.whyItMatters;
-  const ruleDigest = buildRuleDigest(story);
-  const distilledCopy =
-    story.contentType === "product"
-      ? (story.excerpt ?? ruleDigest)
-      : (implication ?? ruleDigest);
+  const interpretation = selectFeedInterpretation(story);
   const displayTitle = story.translatedTitle ?? story.title;
 
   return (
@@ -38,51 +33,57 @@ export function StoryRow({
       <div className="storyIndex" aria-hidden="true">
         {String(index + 1).padStart(2, "0")}
       </div>
-      <div className="storyMetaCells">
-        <strong className="storySource">
-          {story.sourceName ?? "未知信源"}
-        </strong>
-        <span className="storyType">
-          {story.contentType ? contentTypeLabels[story.contentType] : "情报"}
-        </span>
-        <time
-          className="storyTime"
-          dateTime={story.lastPublishedAt?.toISOString()}
-        >
-          {formatDateTime(story.lastPublishedAt)}
-        </time>
-      </div>
       <div className="storyHeadline">
         <Link className="storyTitleLink" href={`/stories/${story.slug}`}>
           <h2>{displayTitle}</h2>
         </Link>
-        <div className="storySignals" aria-label="内容信号">
+        <div className="storySignals" aria-label="筛选线索">
+          <span className="storySignalLabel">筛选线索</span>
           {story.topics.slice(0, 2).map((topic) => (
             <span key={topic}>{topic}</span>
           ))}
-          {story.matchedSignals.slice(0, 3).map((signal) => (
+          {story.matchedSignals.slice(0, 2).map((signal) => (
             <span key={signal}>{signalLabel(signal)}</span>
           ))}
           <span>{story.independentSourceCount} 个独立信源</span>
         </div>
       </div>
       <div className="storyDistill">
-        <p>{distilledCopy}</p>
-        <div className="storyEvidenceState">
-          {story.status === "confirmed" ? (
-            <CheckCircle aria-hidden="true" size={16} weight="fill" />
-          ) : (
-            <Circle aria-hidden="true" size={15} />
-          )}
-          <span>{storyStatusLabels[story.status]}</span>
-          <span
-            className={
-              story.hasAnalysis ? "analysisState ready" : "analysisState"
-            }
-          >
-            {story.hasAnalysis ? "中文分析已生成" : "原文与规则导读"}
-          </span>
-        </div>
+        {interpretation ? (
+          <p>{interpretation}</p>
+        ) : (
+          <p className="interpretationPending">尚无中文解读</p>
+        )}
+        {story.hasAnalysis || story.status === "confirmed" ? (
+          <div className="storyEvidenceState">
+            {story.status === "confirmed" ? (
+              <CheckCircle aria-hidden="true" size={16} weight="fill" />
+            ) : (
+              <Circle aria-hidden="true" size={15} />
+            )}
+            <span>
+              {story.hasAnalysis
+                ? "中文解读已生成"
+                : storyStatusLabels[story.status]}
+            </span>
+          </div>
+        ) : null}
+      </div>
+      <div className="storyMetaCells">
+        <strong className="storySource">
+          {story.sourceName ?? "未知信源"}
+        </strong>
+        <span aria-hidden="true">/</span>
+        <span className="storyType">
+          {story.contentType ? contentTypeLabels[story.contentType] : "情报"}
+        </span>
+        <span aria-hidden="true">/</span>
+        <time
+          className="storyTime"
+          dateTime={story.lastPublishedAt?.toISOString()}
+        >
+          {formatDateTime(story.lastPublishedAt)}
+        </time>
       </div>
       <Link
         className="storyScoreLink"

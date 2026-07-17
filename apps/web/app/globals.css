@@ -1639,11 +1639,8 @@ button {
   display: grid;
   grid-template-columns:
     32px
-    minmax(96px, 0.7fr)
-    48px
-    72px
-    minmax(260px, 1.65fr)
-    minmax(220px, 1fr)
+    minmax(340px, 1.5fr)
+    minmax(240px, 1fr)
     64px;
   column-gap: var(--space-4);
 }
@@ -1661,7 +1658,10 @@ button {
 }
 
 .storyRow {
-  grid-template-areas: "index source type time headline summary score";
+  grid-template-areas:
+    "index headline summary score"
+    "index meta summary score";
+  row-gap: var(--space-3);
   align-items: start;
   padding: var(--space-5) var(--space-3);
   transition: background 160ms ease;
@@ -1686,29 +1686,30 @@ button {
 }
 
 .storyMetaCells {
-  display: contents;
+  grid-area: meta;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  overflow: hidden;
+  color: var(--ink-tertiary);
+  font-size: 11px;
 }
 
 .storySource {
-  grid-area: source;
   overflow: hidden;
-  font-size: 12px;
-  font-weight: 680;
+  color: var(--ink-secondary);
+  font-size: 11px;
+  font-weight: 600;
   line-height: 1.5;
   text-overflow: ellipsis;
-}
-
-.storyType {
-  grid-area: type;
-}
-
-.storyTime {
-  grid-area: time;
+  white-space: nowrap;
 }
 
 .storyType,
 .storyTime {
-  color: var(--ink-secondary);
+  flex: 0 0 auto;
+  color: var(--ink-tertiary);
   font-size: 11px;
   line-height: 1.55;
 }
@@ -1753,6 +1754,11 @@ button {
   font-size: 11px;
 }
 
+.storySignals .storySignalLabel {
+  color: var(--ink-tertiary);
+  font-weight: 600;
+}
+
 .storySignals span:not(:last-child)::after {
   margin-left: var(--space-3);
 }
@@ -1772,6 +1778,11 @@ button {
   overflow-wrap: anywhere;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+}
+
+.storyDistill > .interpretationPending {
+  color: var(--ink-tertiary);
+  font-style: normal;
 }
 
 .storyEvidenceState {
@@ -1915,18 +1926,11 @@ button {
   }
 
   .storyRow {
-    grid-template-columns: 32px minmax(0, 1.35fr) minmax(220px, 1fr) 64px;
+    grid-template-columns: 32px minmax(0, 1.4fr) minmax(220px, 1fr) 64px;
     grid-template-areas:
-      "index meta meta score"
-      "index headline summary score";
+      "index headline summary score"
+      "index meta summary score";
     row-gap: var(--space-3);
-  }
-
-  .storyMetaCells {
-    grid-area: meta;
-    display: flex;
-    align-items: center;
-    gap: var(--space-4);
   }
 
   .signalRail {
@@ -2078,25 +2082,21 @@ button {
   .storyRow:not(.lead) {
     grid-template-columns: 24px minmax(0, 1fr) 56px;
     grid-template-areas:
-      "index meta score"
-      "index headline headline"
-      "index summary summary";
+      "index headline score"
+      "index summary summary"
+      "index meta meta";
     gap: var(--space-3) var(--space-2);
     padding: var(--space-4) 0;
   }
 
   .storyMetaCells {
     min-width: 0;
-    gap: var(--space-3);
+    gap: var(--space-2);
     overflow: hidden;
   }
 
   .storySource {
     min-width: 0;
-  }
-
-  .storyTime {
-    display: none;
   }
 
   .storyTitleLink h2 {

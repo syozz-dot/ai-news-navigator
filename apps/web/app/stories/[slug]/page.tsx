@@ -8,7 +8,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import {
-  buildRuleDigest,
   contentTypeLabels,
   formatFullDateTime,
   formatScore,
@@ -47,8 +46,7 @@ export default async function StoryPage({
   const factualSummary =
     story.analysis?.factualSummary ??
     story.factualSummary ??
-    (story.contentType === "product" ? story.excerpt : null) ??
-    buildRuleDigest(story);
+    (story.contentType === "product" ? story.excerpt : null);
   const displayTitle = story.analysis?.translatedTitle ?? story.title;
 
   return (

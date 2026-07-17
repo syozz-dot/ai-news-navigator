@@ -61,37 +61,16 @@ export function signalLabel(signal: string) {
   return signalLabels[signal] ?? signal.replaceAll("_", " ");
 }
 
-const contentTypeSubjects: Record<ContentType, string> = {
-  news: "一则 AI 新闻",
-  paper: "一篇 AI 论文",
-  product: "一项产品动态",
-  release: "一次版本发布",
-  post: "一篇官方文章",
-  other: "一条 AI 动态",
-};
-
-export function buildRuleDigest(input: {
+export function selectFeedInterpretation(input: {
   contentType: ContentType | null;
-  sourceName: string | null;
-  matchedSignals: string[];
-  independentSourceCount: number;
+  excerpt: string | null;
+  factualSummary: string | null;
+  whyItMatters: string | null;
 }) {
-  const source = input.sourceName ?? "当前信源";
-  const subject = input.contentType
-    ? contentTypeSubjects[input.contentType]
-    : "一条 AI 动态";
-  const signals = input.matchedSignals.slice(0, 3).map(signalLabel);
-  const signalSentence = signals.length
-    ? `规则识别到「${signals.join("、")}」等信号。`
-    : "暂未识别到可展示的规则信号。";
-  return `来自 ${source} 的${subject}进入情报流。${signalSentence}当前由 ${input.independentSourceCount} 个独立信源支持。`;
-}
-
-export function buildRuleSignalNote(signals: string[]) {
-  const labels = signals.slice(0, 3).map(signalLabel);
-  return labels.length
-    ? `当前可核验的规则线索包括「${labels.join("、")}」；它们用于筛选，不代替产品影响判断。`
-    : "当前没有足够的规则线索支持产品影响判断。";
+  if (input.contentType === "product") {
+    return input.factualSummary ?? input.excerpt;
+  }
+  return input.whyItMatters;
 }
 
 export function formatScore(score: number | null) {
