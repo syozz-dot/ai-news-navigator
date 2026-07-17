@@ -144,16 +144,19 @@ describe("Story analysis configuration", () => {
             choices: [
               {
                 message: {
-                  content: JSON.stringify({
-                    translatedTitle: "中文标题",
-                    factualSummary: "事实摘要",
-                    whyItMatters: "值得关注",
-                    underlyingLogic: "底层逻辑",
-                    productImpact: "产品影响",
-                    productOpportunities: ["产品机会"],
-                    openQuestions: ["待确认问题"],
-                    confidence: 0.8,
-                  }),
+                  content: `<think>内部推理不应进入结果</think>
+\`\`\`json
+${JSON.stringify({
+  translatedTitle: "中文标题",
+  factualSummary: "事实摘要",
+  whyItMatters: "值得关注",
+  underlyingLogic: "底层逻辑",
+  productImpact: "产品影响",
+  productOpportunities: ["产品机会"],
+  openQuestions: ["待确认问题"],
+  confidence: 0.8,
+})}
+\`\`\``,
                 },
               },
             ],
@@ -181,6 +184,7 @@ describe("Story analysis configuration", () => {
     expect(requestBody?.model).toBe(DEFAULT_DEEPSEEK_STORY_ANALYSIS_MODEL);
     expect(requestBody?.thinking).toEqual({ type: "disabled" });
     expect(requestBody?.response_format).toEqual({ type: "json_object" });
+    expect(requestBody?.max_tokens).toBe(1_600);
     expect(result.provider).toBe("deepseek");
     expect(result.translatedTitle).toBe("中文标题");
   });

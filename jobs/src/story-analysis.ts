@@ -16,7 +16,7 @@ export const DEFAULT_STORY_ANALYSIS_MODEL = "gpt-5-nano";
 export const DEFAULT_GATEWAY_STORY_ANALYSIS_MODEL = "openai/gpt-5-nano";
 export const DEFAULT_DEEPSEEK_STORY_ANALYSIS_MODEL = "deepseek-v4-flash";
 export const DEFAULT_DEEPSEEK_BASE_URL = "https://api.deepseek.com";
-const STORY_ANALYSIS_MAX_OUTPUT_TOKENS = 900;
+const STORY_ANALYSIS_MAX_OUTPUT_TOKENS = 1_600;
 
 const publicStoryStatuses = [
   "emerging",
@@ -80,6 +80,7 @@ interface GatewayAnalysisOutput {
 
 interface DeepSeekChatCompletionResponse {
   choices?: Array<{
+    finish_reason?: string | null;
     message?: {
       content?: string | null;
     };
@@ -227,9 +228,13 @@ export class DeepSeekStoryAnalyzer implements StoryAnalyzer {
       );
     }
 
-    const content = responseBody.choices?.[0]?.message?.content;
+    const choice = responseBody.choices?.[0];
+    const content = choice?.message?.content;
     if (!content?.trim()) {
       throw new Error("DeepSeek API returned an empty analysis");
+    }
+    if (choice?.finish_reason === "length") {
+      throw new Error("DeepSeek API response exceeded the output token limit");
     }
 
     return normalizeAnalysisOutput(
@@ -347,8 +352,11 @@ function normalizeBaseURL(value: string): string {
 }
 
 function parseAnalysisOutput(content: string): GatewayAnalysisOutput {
-  const trimmed = content.trim();
-  const unfenced = trimmed
+  const withoutThinking = content
+    .trim()
+    .replace(/<think>[\s\S]*?<\/think>/gi, "")
+    .trim();
+  const unfenced = withoutThinking
     .replace(/^```(?:json)?\s*/i, "")
     .replace(/\s*```$/, "")
     .trim();
@@ -363,7 +371,10 @@ function parseAnalysisOutput(content: string): GatewayAnalysisOutput {
   try {
     parsed = JSON.parse(candidate);
   } catch {
-    throw new Error("DeepSeek API returned invalid JSON");
+    const responseEnding = candidate.slice(-180).replace(/\s+/g, " ").trim();
+    throw new Error(
+      `DeepSeek API returned invalid JSON; response ended with: ${responseEnding}`,
+    );
   }
 
   if (!isRecord(parsed)) {
