@@ -47,6 +47,12 @@ The processing command holds an expiring global PostgreSQL job lease. This keeps
 Story interpretation runs as a separate evidence-bound generation stage after
 deterministic scoring and clustering:
 
+- A direct DeepSeek key takes priority. The default is `deepseek-v4-flash`
+  through `https://api.deepseek.com`, with thinking disabled for this
+  extraction-style task. `DEEPSEEK_BASE_URL` and `DEEPSEEK_MODEL` also support
+  compatible relay services.
+- Direct OpenAI and Vercel AI Gateway remain fallbacks when DeepSeek is not
+  configured.
 - Vercel AI Gateway uses deployment OIDC, so production does not need a
   long-lived model-provider API key.
 - Original titles, URLs, excerpts, and evidence records remain unchanged.

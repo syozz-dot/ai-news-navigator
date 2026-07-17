@@ -14,6 +14,8 @@ import { and, desc, eq, gte, inArray, isNull, sql } from "drizzle-orm";
 export const STORY_ANALYSIS_PROMPT_VERSION = "zh-product-analysis-v1";
 export const DEFAULT_STORY_ANALYSIS_MODEL = "gpt-5-nano";
 export const DEFAULT_GATEWAY_STORY_ANALYSIS_MODEL = "openai/gpt-5-nano";
+export const DEFAULT_DEEPSEEK_STORY_ANALYSIS_MODEL = "deepseek-v4-flash";
+export const DEFAULT_DEEPSEEK_BASE_URL = "https://api.deepseek.com";
 const STORY_ANALYSIS_MAX_OUTPUT_TOKENS = 900;
 
 const publicStoryStatuses = [
@@ -74,6 +76,17 @@ interface GatewayAnalysisOutput {
   productOpportunities: string[];
   openQuestions: string[];
   confidence: number;
+}
+
+interface DeepSeekChatCompletionResponse {
+  choices?: Array<{
+    message?: {
+      content?: string | null;
+    };
+  }>;
+  error?: {
+    message?: string;
+  };
 }
 
 const outputSchema = jsonSchema<GatewayAnalysisOutput>({
@@ -144,7 +157,7 @@ function buildAnalysisPrompt(input: StoryAnalysisInput): string {
     publishedAt: item.publishedAt.toISOString(),
   }));
 
-  return `请分析下面这组 Story 证据，并返回符合 schema 的中文结果。
+  return `请分析下面这组 Story 证据，并只返回符合 schema 的 JSON object，不要使用 Markdown 代码块。
 
 原始 Story 标题：${trimText(input.title, 600)}
 
@@ -160,6 +173,71 @@ ${JSON.stringify(evidence, null, 2)}
 - productOpportunities：0–4 条，每条 25–80 个汉字。
 - openQuestions：0–4 条，每条是尚未被证据确认的问题。
 - confidence：0 到 1，依据证据完整度与独立信源数量评估。`;
+}
+
+export class DeepSeekStoryAnalyzer implements StoryAnalyzer {
+  readonly provider = "deepseek";
+  readonly model: string;
+  readonly baseURL: string;
+
+  constructor(
+    private readonly options: {
+      apiKey: string;
+      model?: string;
+      baseURL?: string;
+      fetch?: typeof globalThis.fetch;
+    },
+  ) {
+    this.model = options.model?.trim() || DEFAULT_DEEPSEEK_STORY_ANALYSIS_MODEL;
+    this.baseURL = normalizeBaseURL(
+      options.baseURL?.trim() || DEFAULT_DEEPSEEK_BASE_URL,
+    );
+  }
+
+  async analyze(input: StoryAnalysisInput): Promise<GeneratedStoryAnalysis> {
+    const fetchImplementation = this.options.fetch ?? globalThis.fetch;
+    const response = await fetchImplementation(
+      `${this.baseURL}/chat/completions`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${this.options.apiKey.trim()}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: this.model,
+          messages: [
+            { role: "system", content: analysisSystemPrompt },
+            { role: "user", content: buildAnalysisPrompt(input) },
+          ],
+          response_format: { type: "json_object" },
+          thinking: { type: "disabled" },
+          max_tokens: STORY_ANALYSIS_MAX_OUTPUT_TOKENS,
+          stream: false,
+        }),
+      },
+    );
+
+    const responseBody =
+      (await response.json()) as DeepSeekChatCompletionResponse;
+    if (!response.ok) {
+      throw new Error(
+        responseBody.error?.message ||
+          `DeepSeek API request failed with status ${response.status}`,
+      );
+    }
+
+    const content = responseBody.choices?.[0]?.message?.content;
+    if (!content?.trim()) {
+      throw new Error("DeepSeek API returned an empty analysis");
+    }
+
+    return normalizeAnalysisOutput(
+      parseAnalysisOutput(content),
+      this.provider,
+      this.model,
+    );
+  }
 }
 
 export class VercelGatewayStoryAnalyzer implements StoryAnalyzer {
@@ -264,10 +342,92 @@ function normalizeAnalysisOutput(
   };
 }
 
+function normalizeBaseURL(value: string): string {
+  return value.replace(/\/+$/, "");
+}
+
+function parseAnalysisOutput(content: string): GatewayAnalysisOutput {
+  const trimmed = content.trim();
+  const unfenced = trimmed
+    .replace(/^```(?:json)?\s*/i, "")
+    .replace(/\s*```$/, "")
+    .trim();
+  const firstBrace = unfenced.indexOf("{");
+  const lastBrace = unfenced.lastIndexOf("}");
+  const candidate =
+    firstBrace >= 0 && lastBrace > firstBrace
+      ? unfenced.slice(firstBrace, lastBrace + 1)
+      : unfenced;
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(candidate);
+  } catch {
+    throw new Error("DeepSeek API returned invalid JSON");
+  }
+
+  if (!isRecord(parsed)) {
+    throw new Error("DeepSeek API returned an invalid analysis object");
+  }
+
+  const stringFields = [
+    "translatedTitle",
+    "factualSummary",
+    "whyItMatters",
+    "underlyingLogic",
+    "productImpact",
+  ] as const;
+  for (const field of stringFields) {
+    if (typeof parsed[field] !== "string") {
+      throw new Error(`DeepSeek analysis field ${field} must be a string`);
+    }
+  }
+  if (!isStringArray(parsed.productOpportunities)) {
+    throw new Error(
+      "DeepSeek analysis field productOpportunities must be a string array",
+    );
+  }
+  if (!isStringArray(parsed.openQuestions)) {
+    throw new Error(
+      "DeepSeek analysis field openQuestions must be a string array",
+    );
+  }
+  if (
+    typeof parsed.confidence !== "number" ||
+    !Number.isFinite(parsed.confidence)
+  ) {
+    throw new Error("DeepSeek analysis field confidence must be a number");
+  }
+
+  return parsed as unknown as GatewayAnalysisOutput;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isStringArray(value: unknown): value is string[] {
+  return (
+    Array.isArray(value) && value.every((item) => typeof item === "string")
+  );
+}
+
 export function createConfiguredStoryAnalyzer(input?: {
   authorizationToken?: string | null;
   openAIApiKey?: string | null;
+  deepSeekApiKey?: string | null;
 }): StoryAnalyzer | null {
+  const deepSeekApiKey =
+    input?.deepSeekApiKey ?? process.env.DEEPSEEK_API_KEY ?? null;
+  if (deepSeekApiKey?.trim()) {
+    return new DeepSeekStoryAnalyzer({
+      apiKey: deepSeekApiKey,
+      baseURL: process.env.DEEPSEEK_BASE_URL || DEFAULT_DEEPSEEK_BASE_URL,
+      model:
+        process.env.DEEPSEEK_MODEL || DEFAULT_DEEPSEEK_STORY_ANALYSIS_MODEL,
+    });
+  }
+
   const openAIApiKey =
     input?.openAIApiKey ?? process.env.OPENAI_API_KEY ?? null;
   if (openAIApiKey?.trim()) {

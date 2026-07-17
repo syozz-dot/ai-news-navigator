@@ -46,6 +46,9 @@ export {
 } from "./scheduled-work.js";
 export {
   createConfiguredStoryAnalyzer,
+  DeepSeekStoryAnalyzer,
+  DEFAULT_DEEPSEEK_BASE_URL,
+  DEFAULT_DEEPSEEK_STORY_ANALYSIS_MODEL,
   DEFAULT_GATEWAY_STORY_ANALYSIS_MODEL,
   DEFAULT_STORY_ANALYSIS_MODEL,
   OpenAIStoryAnalyzer,
