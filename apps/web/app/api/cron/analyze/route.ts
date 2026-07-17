@@ -39,6 +39,15 @@ export async function GET(request: Request) {
   }
 
   try {
+    const requestedLimit = Number(
+      new URL(request.url).searchParams.get("limit") ?? "120",
+    );
+    const batchSize =
+      Number.isInteger(requestedLimit) &&
+      requestedLimit >= 1 &&
+      requestedLimit <= 120
+        ? requestedLimit
+        : 120;
     const { db } = getDatabaseConnection();
     const analyzer = createConfiguredStoryAnalyzer({
       authorizationToken: request.headers.get("x-vercel-oidc-token"),
@@ -47,7 +56,7 @@ export async function GET(request: Request) {
       db,
       logger,
       analyzer,
-      batchSize: 120,
+      batchSize,
       concurrency: 5,
     });
     return NextResponse.json({ analysis });
