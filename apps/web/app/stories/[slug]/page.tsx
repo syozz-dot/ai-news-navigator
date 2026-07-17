@@ -120,6 +120,13 @@ export default async function StoryPage({
                 ) : (
                   <MissingAnalysis label="产品影响分析" />
                 )}
+                {story.analysis?.productOpportunities.length ? (
+                  <ul className="opportunityList">
+                    {story.analysis.productOpportunities.map((opportunity) => (
+                      <li key={opportunity}>{opportunity}</li>
+                    ))}
+                  </ul>
+                ) : null}
                 <div className="ruleBasis">
                   <strong>入选依据</strong>
                   <p>{buildRuleSignalNote(story.matchedSignals)}</p>
@@ -156,23 +163,23 @@ export default async function StoryPage({
               </section>
             ) : null}
 
-            <section
-              className={productView ? "productOpportunitySection" : undefined}
-            >
-              <h2>产品与商业机会</h2>
-              {!productView && story.analysis?.productImpact ? (
-                <p>{story.analysis.productImpact}</p>
-              ) : null}
-              {story.analysis?.productOpportunities.length ? (
-                <ul className="opportunityList">
-                  {story.analysis.productOpportunities.map((opportunity) => (
-                    <li key={opportunity}>{opportunity}</li>
-                  ))}
-                </ul>
-              ) : (
-                <MissingAnalysis label="机会分析" />
-              )}
-            </section>
+            {!productView ? (
+              <section>
+                <h2>产品与商业机会</h2>
+                {story.analysis?.productImpact ? (
+                  <p>{story.analysis.productImpact}</p>
+                ) : null}
+                {story.analysis?.productOpportunities.length ? (
+                  <ul className="opportunityList">
+                    {story.analysis.productOpportunities.map((opportunity) => (
+                      <li key={opportunity}>{opportunity}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <MissingAnalysis label="机会分析" />
+                )}
+              </section>
+            ) : null}
 
             {story.analysis?.openQuestions.length ? (
               <section>
