@@ -27,6 +27,10 @@ export function StoryRow({
   const score = story.overallScore ?? story.relevanceScore;
   const implication = story.whyItMatters;
   const ruleDigest = buildRuleDigest(story);
+  const distilledCopy =
+    story.contentType === "product"
+      ? (story.excerpt ?? ruleDigest)
+      : (implication ?? ruleDigest);
   const displayTitle = story.translatedTitle ?? story.title;
 
   return (
@@ -63,7 +67,7 @@ export function StoryRow({
         </div>
       </div>
       <div className="storyDistill">
-        {implication ? <p>{implication}</p> : <p>{ruleDigest}</p>}
+        <p>{distilledCopy}</p>
         <div className="storyEvidenceState">
           {story.status === "confirmed" ? (
             <CheckCircle aria-hidden="true" size={16} weight="fill" />

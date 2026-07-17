@@ -47,6 +47,7 @@ export default async function StoryPage({
   const factualSummary =
     story.analysis?.factualSummary ??
     story.factualSummary ??
+    (story.contentType === "product" ? story.excerpt : null) ??
     buildRuleDigest(story);
   const displayTitle = story.analysis?.translatedTitle ?? story.title;
 

@@ -209,6 +209,13 @@ export const getStoryFeed = cache(
           eq(primaryItems.contentType, contentType),
         )
       : inArray(stories.status, publicStoryStatuses);
+    const relevanceSort = desc(
+      sql`coalesce(${stories.overallScore}, ${stories.relevanceScore}, 0)`,
+    );
+    const sortOrder =
+      contentType === "product"
+        ? [desc(stories.lastPublishedAt), relevanceSort]
+        : [relevanceSort, desc(stories.lastPublishedAt)];
 
     const [baseRows, totals] = await Promise.all([
       db
@@ -235,12 +242,7 @@ export const getStoryFeed = cache(
         .leftJoin(primaryItems, eq(stories.primaryItemId, primaryItems.id))
         .leftJoin(sources, eq(primaryItems.sourceId, sources.id))
         .where(where)
-        .orderBy(
-          desc(
-            sql`coalesce(${stories.overallScore}, ${stories.relevanceScore}, 0)`,
-          ),
-          desc(stories.lastPublishedAt),
-        )
+        .orderBy(...sortOrder)
         .limit(limit),
       db
         .select({ count: count() })

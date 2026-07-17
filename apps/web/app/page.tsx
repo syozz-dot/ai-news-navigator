@@ -62,6 +62,7 @@ export default async function Home({
   const focusStory = items[0];
   const focusSummary =
     focusStory?.factualSummary ??
+    (focusStory?.contentType === "product" ? focusStory.excerpt : null) ??
     (focusStory ? buildRuleDigest(focusStory) : null) ??
     "今日焦点正在等待第一条可验证的 Story。";
   const focusFact = focusStory
@@ -184,7 +185,9 @@ export default async function Home({
               <h2 id="feed-title">情报流</h2>
               <span>
                 {activeType
-                  ? `${contentTypeLabels[activeType]} · 按相关度排序`
+                  ? activeType === "product"
+                    ? "产品 · 按发布时间排序"
+                    : `${contentTypeLabels[activeType]} · 按相关度排序`
                   : "按相关度排序"}
               </span>
             </div>
@@ -197,7 +200,7 @@ export default async function Home({
               <span>类型</span>
               <span>时间</span>
               <span>Story</span>
-              <span>产品意义</span>
+              <span>{activeType === "product" ? "产品简介" : "产品意义"}</span>
               <span>相关度</span>
             </div>
           ) : null}
