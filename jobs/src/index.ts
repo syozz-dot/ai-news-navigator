@@ -57,6 +57,7 @@ export {
   VercelGatewayStoryAnalyzer,
   type GeneratedStoryAnalysis,
   type StoryAnalysisInput,
+  type StoryAnalysisContentType,
   type StoryAnalysisResult,
   type StoryAnalyzer,
 } from "./story-analysis.js";

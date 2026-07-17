@@ -10,6 +10,7 @@ import type { IngestionLogger } from "@ai-news-navigator/pipeline";
 import { createOpenAI } from "@ai-sdk/openai";
 import { Output, generateText, jsonSchema } from "ai";
 import { and, desc, eq, gte, inArray, isNull, sql } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 
 export const STORY_ANALYSIS_PROMPT_VERSION = "zh-product-analysis-v1";
 export const DEFAULT_STORY_ANALYSIS_MODEL = "gpt-5-nano";
@@ -466,6 +467,8 @@ interface PendingStory {
   title: string;
 }
 
+export type StoryAnalysisContentType = typeof items.$inferSelect.contentType;
+
 export class PostgresStoryAnalysisProcessor {
   constructor(
     private readonly db: Database,
@@ -476,6 +479,7 @@ export class PostgresStoryAnalysisProcessor {
   async processBatch(
     limit = 30,
     concurrency = 4,
+    contentType?: StoryAnalysisContentType,
   ): Promise<StoryAnalysisResult> {
     if (!Number.isInteger(limit) || limit < 1 || limit > 200) {
       throw new Error("Story analysis batch limit must be between 1 and 200");
@@ -484,7 +488,7 @@ export class PostgresStoryAnalysisProcessor {
       throw new Error("Story analysis concurrency must be between 1 and 10");
     }
 
-    const pending = await this.#getPendingStories(limit);
+    const pending = await this.#getPendingStories(limit, contentType);
     const result: StoryAnalysisResult = {
       attemptedCount: pending.length,
       generatedCount: 0,
@@ -545,10 +549,15 @@ export class PostgresStoryAnalysisProcessor {
     return result;
   }
 
-  async #getPendingStories(limit: number): Promise<PendingStory[]> {
+  async #getPendingStories(
+    limit: number,
+    contentType?: StoryAnalysisContentType,
+  ): Promise<PendingStory[]> {
+    const primaryItems = alias(items, "analysis_primary_items");
     return this.db
       .select({ id: stories.id, title: stories.title })
       .from(stories)
+      .leftJoin(primaryItems, eq(stories.primaryItemId, primaryItems.id))
       .leftJoin(
         storyAnalyses,
         and(
@@ -561,6 +570,7 @@ export class PostgresStoryAnalysisProcessor {
         and(
           inArray(stories.status, [...publicStoryStatuses]),
           isNull(storyAnalyses.id),
+          contentType ? eq(primaryItems.contentType, contentType) : undefined,
         ),
       )
       .orderBy(

@@ -19,6 +19,7 @@ import {
 } from "./story-processing.js";
 import {
   PostgresStoryAnalysisProcessor,
+  type StoryAnalysisContentType,
   type StoryAnalysisResult,
   type StoryAnalyzer,
 } from "./story-analysis.js";
@@ -167,6 +168,7 @@ export async function runStoryAnalysis(input: {
   analyzer: StoryAnalyzer | null;
   batchSize?: number;
   concurrency?: number;
+  contentType?: StoryAnalysisContentType;
 }): Promise<
   StoryAnalysisResult & {
     acquired: boolean;
@@ -252,6 +254,7 @@ export async function runStoryAnalysis(input: {
     const result = await processor.processBatch(
       input.batchSize ?? 60,
       input.concurrency ?? 5,
+      input.contentType,
     );
     Object.assign(totals, result);
     await finishRun(result.failedCount > 0 ? "partial" : "succeeded");

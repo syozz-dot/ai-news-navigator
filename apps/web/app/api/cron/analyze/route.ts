@@ -3,6 +3,7 @@ import { timingSafeEqual } from "node:crypto";
 import {
   createConfiguredStoryAnalyzer,
   runStoryAnalysis,
+  type StoryAnalysisContentType,
 } from "@ai-news-navigator/jobs";
 import type { IngestionLogger } from "@ai-news-navigator/pipeline";
 import { NextResponse } from "next/server";
@@ -17,6 +18,15 @@ const logger: IngestionLogger = {
   warn: (message, context) => console.warn(message, context ?? {}),
   error: (message, context) => console.error(message, context ?? {}),
 };
+
+const supportedContentTypes = new Set<StoryAnalysisContentType>([
+  "news",
+  "paper",
+  "product",
+  "release",
+  "post",
+  "other",
+]);
 
 function authorized(request: Request, secret: string) {
   const provided = request.headers.get("authorization") ?? "";
@@ -39,9 +49,14 @@ export async function GET(request: Request) {
   }
 
   try {
-    const requestedLimit = Number(
-      new URL(request.url).searchParams.get("limit") ?? "120",
-    );
+    const searchParams = new URL(request.url).searchParams;
+    const requestedLimit = Number(searchParams.get("limit") ?? "120");
+    const requestedContentType = searchParams.get("type");
+    const contentType = supportedContentTypes.has(
+      requestedContentType as StoryAnalysisContentType,
+    )
+      ? (requestedContentType as StoryAnalysisContentType)
+      : undefined;
     const batchSize =
       Number.isInteger(requestedLimit) &&
       requestedLimit >= 1 &&
@@ -58,6 +73,7 @@ export async function GET(request: Request) {
       analyzer,
       batchSize,
       concurrency: 5,
+      ...(contentType ? { contentType } : {}),
     });
     return NextResponse.json({ analysis });
   } catch (error) {
