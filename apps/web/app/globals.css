@@ -590,7 +590,8 @@ button {
   min-height: 80dvh;
 }
 .storyDetailShell {
-  width: min(100% - 40px, 1320px);
+  width: min(calc(100% - 40px), 1320px);
+  min-width: 0;
   margin: 0 auto;
 }
 .backLink {
@@ -616,8 +617,10 @@ button {
   margin: 26px 0 0;
   font-size: clamp(38px, 5.7vw, 78px);
   font-weight: 610;
-  letter-spacing: -0.065em;
+  letter-spacing: -0.04em;
   line-height: 1.04;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .storyHero .storyOriginalTitle {
@@ -777,6 +780,7 @@ button {
   margin: 9px 0;
   font-size: 13px;
   line-height: 1.5;
+  overflow-wrap: anywhere;
   transition: color 150ms ease;
 }
 .evidenceList a:hover h3 {
@@ -1023,7 +1027,7 @@ button {
   .siteFooter,
   .storyDetailShell,
   .loadingPage {
-    width: min(100% - 28px, 100%);
+    width: calc(100% - 28px);
   }
   .setupPage {
     width: min(100% - 28px, 100%);
@@ -1146,7 +1150,8 @@ button {
     padding: 42px 0 38px;
   }
   .storyHero h1 {
-    font-size: 39px;
+    font-size: 34px;
+    letter-spacing: -0.035em;
     line-height: 1.08;
   }
   .storyHero > p {
