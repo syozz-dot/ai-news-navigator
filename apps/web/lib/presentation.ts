@@ -4,7 +4,8 @@ export const contentTypeLabels = {
   news: "新闻",
   paper: "论文",
   product: "产品",
-  release: "发布",
+  model: "模型",
+  release: "版本更新",
   post: "文章",
   other: "其他",
 } as const;
@@ -21,6 +22,7 @@ const signalLabels: Record<string, string> = {
   "ai:ai-term": "AI 主题",
   "ai:ai-company": "AI 公司",
   "ai:model-family": "模型家族",
+  "ai:model-radar": "模型雷达",
   "ai:artificial-intelligence": "人工智能",
   "ai:generative-ai": "生成式 AI",
   "ai:large-language-model": "大语言模型",

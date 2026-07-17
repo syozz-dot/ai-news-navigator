@@ -39,6 +39,25 @@ describe("scoreItemRelevance", () => {
     expect(nonAiProduct.isRelevant).toBe(false);
   });
 
+  it("treats curated model-radar entries as centrally relevant AI models", () => {
+    const result = scoreItemRelevance({
+      contentType: "model",
+      title: "Inkling",
+      excerpt:
+        "Hugging Face Trending model with eval results for multimodal reasoning.",
+      metadata: {
+        trendingScore: 905,
+        likes: 924,
+        selection: "hugging-face-trending-notability-v1",
+      },
+    });
+
+    expect(result.isRelevant).toBe(true);
+    expect(result.aiCentralityScore).toBeGreaterThanOrEqual(0.55);
+    expect(result.matchedSignals).toContain("ai:model-radar");
+    expect(result.reasons).toContain("Passed model threshold 0.38");
+  });
+
   it("filters category-adjacent papers without meaningful AI centrality", () => {
     const result = scoreItemRelevance({
       contentType: "paper",

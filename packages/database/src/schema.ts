@@ -49,6 +49,7 @@ export const contentTypeEnum = pgEnum("content_type", [
   "news",
   "paper",
   "product",
+  "model",
   "release",
   "post",
   "other",

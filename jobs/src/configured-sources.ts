@@ -1,14 +1,12 @@
 import {
   arxivAiSource,
   createArxivAiAdapter,
-  createOllamaReleaseAdapter,
+  createHuggingFaceModelsAdapter,
   createOpenAiNewsAdapter,
   createProductHuntAdapter,
-  createVllmReleaseAdapter,
-  ollamaReleaseSource,
+  huggingFaceModelsSource,
   openAiNewsSource,
   productHuntSource,
-  vllmReleaseSource,
   type SourceAdapter,
   type SourceDefinition,
 } from "@ai-news-navigator/sources";
@@ -33,12 +31,8 @@ export function createConfiguredSources(): ConfiguredSource[] {
       adapter: createArxivAiAdapter(),
     },
     {
-      definition: ollamaReleaseSource,
-      adapter: createOllamaReleaseAdapter(),
-    },
-    {
-      definition: vllmReleaseSource,
-      adapter: createVllmReleaseAdapter(),
+      definition: huggingFaceModelsSource,
+      adapter: createHuggingFaceModelsAdapter(),
     },
   ];
 }

@@ -12,7 +12,7 @@ export type SourceType =
 export type SourceReliability = "primary" | "high" | "medium" | "low";
 
 export type ContentType =
-  "news" | "paper" | "product" | "release" | "post" | "other";
+  "news" | "paper" | "product" | "model" | "release" | "post" | "other";
 
 export type PublicationTimeConfidence = "exact" | "inferred" | "unknown";
 

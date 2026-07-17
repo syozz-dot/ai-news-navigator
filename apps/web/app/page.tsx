@@ -18,7 +18,7 @@ const filters: Array<{ label: string; value?: ContentType }> = [
   { label: "新闻", value: "news" },
   { label: "论文", value: "paper" },
   { label: "产品", value: "product" },
-  { label: "发布", value: "release" },
+  { label: "模型", value: "model" },
 ];
 
 function parseContentType(value: string | undefined): ContentType | undefined {
@@ -26,6 +26,7 @@ function parseContentType(value: string | undefined): ContentType | undefined {
     "news",
     "paper",
     "product",
+    "model",
     "release",
     "post",
     "other",

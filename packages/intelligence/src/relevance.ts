@@ -182,6 +182,7 @@ const CONTENT_PRIOR: Record<ContentType, number> = {
   news: 0.08,
   paper: 0,
   product: 0.16,
+  model: 0.16,
   release: 0.12,
   post: 0.04,
   other: 0,
@@ -191,6 +192,7 @@ const THRESHOLD: Record<ContentType, number> = {
   news: 0.4,
   paper: 0.42,
   product: 0.4,
+  model: 0.38,
   release: 0.38,
   post: 0.42,
   other: 0.45,
@@ -253,8 +255,17 @@ export function scoreItemRelevance(input: RelevanceInput): RelevanceAssessment {
   const body = normalize(input.excerpt ?? "");
   const ai = signalScore(title, body, AI_SIGNALS);
   const product = signalScore(title, body, PRODUCT_SIGNALS);
-  const aiCentralityScore = Math.max(ai.score, categoryPrior(input.metadata));
-  const implicitProductLaunch = input.contentType === "product" ? 0.26 : 0;
+  const aiCentralityScore = Math.max(
+    ai.score,
+    categoryPrior(input.metadata),
+    input.contentType === "model" ? 0.55 : 0,
+  );
+  const implicitProductLaunch =
+    input.contentType === "product"
+      ? 0.26
+      : input.contentType === "model"
+        ? 0.18
+        : 0;
   const productImpactScore =
     1 - (1 - product.score) * (1 - implicitProductLaunch);
   const relevanceScore = Math.min(
@@ -274,6 +285,9 @@ export function scoreItemRelevance(input: RelevanceInput): RelevanceAssessment {
     !matchedSignals.includes("product:launch")
   ) {
     matchedSignals.push("product:launch");
+  }
+  if (input.contentType === "model") {
+    matchedSignals.push("ai:model-radar");
   }
 
   return {

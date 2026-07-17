@@ -8,7 +8,17 @@ import {
   storyTopics,
   topics,
 } from "@ai-news-navigator/database";
-import { and, asc, count, desc, eq, inArray, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  inArray,
+  ne,
+  notInArray,
+  sql,
+} from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { cache } from "react";
 
@@ -208,7 +218,10 @@ export const getStoryFeed = cache(
           inArray(stories.status, publicStoryStatuses),
           eq(primaryItems.contentType, contentType),
         )
-      : inArray(stories.status, publicStoryStatuses);
+      : and(
+          inArray(stories.status, publicStoryStatuses),
+          ne(primaryItems.contentType, "release"),
+        );
     const relevanceSort = desc(
       sql`coalesce(${stories.overallScore}, ${stories.relevanceScore}, 0)`,
     );
@@ -273,6 +286,12 @@ export const getSourceHealth = cache(async (): Promise<SourceHealthItem[]> => {
       consecutiveFailures: sources.consecutiveFailures,
     })
     .from(sources)
+    .where(
+      notInArray(sources.slug, [
+        "github-ollama-ollama-releases",
+        "github-vllm-project-vllm-releases",
+      ]),
+    )
     .orderBy(asc(sources.status), asc(sources.name));
 });
 

@@ -11,6 +11,7 @@ export async function GET(request: Request) {
     "news",
     "paper",
     "product",
+    "model",
     "release",
     "post",
     "other",

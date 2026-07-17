@@ -5,6 +5,10 @@ export {
 } from "./arxiv-adapter.js";
 export { arxivAiSource, createArxivAiAdapter } from "./definitions/arxiv-ai.js";
 export {
+  createHuggingFaceModelsAdapter,
+  huggingFaceModelsSource,
+} from "./definitions/hugging-face-models.js";
+export {
   createOllamaReleaseAdapter,
   createVllmReleaseAdapter,
   ollamaReleaseProject,
@@ -19,6 +23,11 @@ export {
   type GitHubReleaseAdapterOptions,
   type GitHubReleaseProject,
 } from "./github-release-adapter.js";
+export {
+  createHuggingFaceModelAdapter,
+  HuggingFaceModelAdapter,
+  type HuggingFaceModelAdapterOptions,
+} from "./hugging-face-model-adapter.js";
 export {
   createOpenAiNewsAdapter,
   openAiNewsSource,

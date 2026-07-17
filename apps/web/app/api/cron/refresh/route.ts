@@ -41,13 +41,20 @@ export async function GET(request: Request) {
   }
 
   try {
+    const searchParams = new URL(request.url).searchParams;
+    const shouldAnalyze = searchParams.get("analyze") !== "0";
     const { db } = getDatabaseConnection();
     const ingestion = await runDueSourceIngestion({ db, logger });
     const processing = await runStoryProcessing({ db, logger });
-    const analyzer = createConfiguredStoryAnalyzer({
-      authorizationToken: request.headers.get("x-vercel-oidc-token"),
-    });
-    const analysis = await runStoryAnalysis({ db, logger, analyzer });
+    const analysis = shouldAnalyze
+      ? await runStoryAnalysis({
+          db,
+          logger,
+          analyzer: createConfiguredStoryAnalyzer({
+            authorizationToken: request.headers.get("x-vercel-oidc-token"),
+          }),
+        })
+      : { skipped: true };
     return NextResponse.json({ ingestion, processing, analysis });
   } catch (error) {
     logger.error("Scheduled refresh failed", {

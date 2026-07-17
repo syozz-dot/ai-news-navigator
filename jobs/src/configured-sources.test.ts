@@ -15,8 +15,7 @@ describe("configured sources", () => {
       "openai-news",
       "product-hunt",
       "arxiv-ai",
-      "github-ollama-ollama-releases",
-      "github-vllm-project-vllm-releases",
+      "hugging-face-models",
     ]);
   });
 });

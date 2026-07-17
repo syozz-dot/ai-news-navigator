@@ -23,6 +23,7 @@ const supportedContentTypes = new Set<StoryAnalysisContentType>([
   "news",
   "paper",
   "product",
+  "model",
   "release",
   "post",
   "other",

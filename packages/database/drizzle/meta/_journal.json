@@ -43,6 +43,13 @@
       "when": 1784258006880,
       "tag": "0005_shocking_wildside",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1784308484957,
+      "tag": "0006_happy_snowbird",
+      "breakpoints": true
     }
   ]
 }
