@@ -46,7 +46,9 @@ export {
 } from "./scheduled-work.js";
 export {
   createConfiguredStoryAnalyzer,
+  DEFAULT_GATEWAY_STORY_ANALYSIS_MODEL,
   DEFAULT_STORY_ANALYSIS_MODEL,
+  OpenAIStoryAnalyzer,
   PostgresStoryAnalysisProcessor,
   STORY_ANALYSIS_PROMPT_VERSION,
   VercelGatewayStoryAnalyzer,

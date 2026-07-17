@@ -96,6 +96,9 @@ importers:
       '@ai-news-navigator/sources':
         specifier: workspace:*
         version: link:../packages/sources
+      '@ai-sdk/openai':
+        specifier: ^3.0.85
+        version: 3.0.85(zod@4.4.3)
       ai:
         specifier: ^6.0.0
         version: 6.0.226(zod@4.4.3)
@@ -134,6 +137,12 @@ packages:
 
   '@ai-sdk/gateway@3.0.150':
     resolution: {integrity: sha512-mA5iaIf7mja+D+CGagS/PjLgJiujN5/0JcNVm1u5a62ZlxD2UVMOBA0oreFGTmGcU5nY/J6njijVI6s+wGCb+g==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
+  '@ai-sdk/openai@3.0.85':
+    resolution: {integrity: sha512-/j7rPYswnWhStDbaO75gLVwq+Tm73vCquFCNTuYYyxY31TP0ZG7d0ZANIjiVlNDEVqQqXNBeMrEzGCpSN4QnKg==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -1750,6 +1759,12 @@ snapshots:
       '@ai-sdk/provider': 3.0.14
       '@ai-sdk/provider-utils': 4.0.39(zod@4.4.3)
       '@vercel/oidc': 3.2.0
+      zod: 4.4.3
+
+  '@ai-sdk/openai@3.0.85(zod@4.4.3)':
+    dependencies:
+      '@ai-sdk/provider': 3.0.14
+      '@ai-sdk/provider-utils': 4.0.39(zod@4.4.3)
       zod: 4.4.3
 
   '@ai-sdk/provider-utils@4.0.39(zod@4.4.3)':

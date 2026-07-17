@@ -20,6 +20,7 @@
     "@ai-news-navigator/intelligence": "workspace:*",
     "@ai-news-navigator/pipeline": "workspace:*",
     "@ai-news-navigator/sources": "workspace:*",
+    "@ai-sdk/openai": "^3.0.85",
     "ai": "^6.0.0",
     "drizzle-orm": "^0.45.2"
   }

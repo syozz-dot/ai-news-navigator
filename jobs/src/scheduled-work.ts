@@ -218,9 +218,9 @@ export async function runStoryAnalysis(input: {
   };
 
   if (!input.analyzer) {
-    totals.errorMessages.push("AI Gateway credentials were unavailable");
+    totals.errorMessages.push("Story analysis credentials were unavailable");
     input.logger.warn(
-      "Story analysis skipped because AI Gateway is unavailable",
+      "Story analysis skipped because no AI provider is configured",
     );
     await finishRun("skipped");
     return totals;

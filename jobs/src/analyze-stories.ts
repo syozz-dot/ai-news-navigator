@@ -15,7 +15,7 @@ const logger: IngestionLogger = {
 const analyzer = createConfiguredStoryAnalyzer();
 if (!analyzer) {
   throw new Error(
-    "AI Gateway credentials are required locally. Set AI_GATEWAY_API_KEY or refresh VERCEL_OIDC_TOKEN.",
+    "Story analysis credentials are required. Set OPENAI_API_KEY, AI_GATEWAY_API_KEY, or refresh VERCEL_OIDC_TOKEN.",
   );
 }
 

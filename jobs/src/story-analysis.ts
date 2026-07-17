@@ -7,11 +7,14 @@ import {
   type Database,
 } from "@ai-news-navigator/database";
 import type { IngestionLogger } from "@ai-news-navigator/pipeline";
+import { createOpenAI } from "@ai-sdk/openai";
 import { Output, generateText, jsonSchema } from "ai";
 import { and, desc, eq, gte, inArray, isNull, sql } from "drizzle-orm";
 
 export const STORY_ANALYSIS_PROMPT_VERSION = "zh-product-analysis-v1";
-export const DEFAULT_STORY_ANALYSIS_MODEL = "alibaba/qwen3.5-flash";
+export const DEFAULT_STORY_ANALYSIS_MODEL = "gpt-5-nano";
+export const DEFAULT_GATEWAY_STORY_ANALYSIS_MODEL = "openai/gpt-5-nano";
+const STORY_ANALYSIS_MAX_OUTPUT_TOKENS = 900;
 
 const publicStoryStatuses = [
   "emerging",
@@ -183,43 +186,97 @@ export class VercelGatewayStoryAnalyzer implements StoryAnalyzer {
         description: "基于原始证据生成的简体中文 Story 分析",
         schema: outputSchema,
       }),
-      temperature: 0.2,
-      maxOutputTokens: 1_400,
+      maxOutputTokens: STORY_ANALYSIS_MAX_OUTPUT_TOKENS,
+      maxRetries: 1,
       ...(authorizationToken
         ? { headers: { Authorization: `Bearer ${authorizationToken}` } }
         : {}),
     });
 
-    const output = result.output;
-    const translatedTitle = trimText(output.translatedTitle, 180);
-    const factualSummary = trimText(output.factualSummary, 500);
-    if (!translatedTitle || !factualSummary) {
-      throw new Error("Story analysis omitted the translated title or summary");
-    }
-    return {
-      translatedTitle,
-      factualSummary,
-      whyItMatters: nullableText(trimText(output.whyItMatters, 500)),
-      underlyingLogic: nullableText(trimText(output.underlyingLogic, 600)),
-      productImpact: nullableText(trimText(output.productImpact, 500)),
-      productOpportunities: output.productOpportunities
-        .map((item) => trimText(item, 300))
-        .filter(Boolean)
-        .slice(0, 4),
-      openQuestions: output.openQuestions
-        .map((item) => trimText(item, 300))
-        .filter(Boolean)
-        .slice(0, 4),
-      confidence: Math.min(1, Math.max(0, output.confidence)),
-      provider: this.provider,
-      model: this.model,
-    };
+    return normalizeAnalysisOutput(result.output, this.provider, this.model);
   }
+}
+
+export class OpenAIStoryAnalyzer implements StoryAnalyzer {
+  readonly provider = "openai";
+  readonly model: string;
+
+  constructor(
+    private readonly options: {
+      apiKey: string;
+      model?: string;
+    },
+  ) {
+    this.model = options.model ?? DEFAULT_STORY_ANALYSIS_MODEL;
+  }
+
+  async analyze(input: StoryAnalysisInput): Promise<GeneratedStoryAnalysis> {
+    const openai = createOpenAI({ apiKey: this.options.apiKey.trim() });
+    const result = await generateText({
+      model: openai.responses(this.model),
+      system: analysisSystemPrompt,
+      prompt: buildAnalysisPrompt(input),
+      output: Output.object({
+        name: "story_analysis_zh",
+        description: "基于原始证据生成的简体中文 Story 分析",
+        schema: outputSchema,
+      }),
+      maxOutputTokens: STORY_ANALYSIS_MAX_OUTPUT_TOKENS,
+      maxRetries: 1,
+      providerOptions: {
+        openai: {
+          reasoningEffort: "minimal",
+        },
+      },
+    });
+
+    return normalizeAnalysisOutput(result.output, this.provider, this.model);
+  }
+}
+
+function normalizeAnalysisOutput(
+  output: GatewayAnalysisOutput,
+  provider: string,
+  model: string,
+): GeneratedStoryAnalysis {
+  const translatedTitle = trimText(output.translatedTitle, 180);
+  const factualSummary = trimText(output.factualSummary, 500);
+  if (!translatedTitle || !factualSummary) {
+    throw new Error("Story analysis omitted the translated title or summary");
+  }
+  return {
+    translatedTitle,
+    factualSummary,
+    whyItMatters: nullableText(trimText(output.whyItMatters, 500)),
+    underlyingLogic: nullableText(trimText(output.underlyingLogic, 600)),
+    productImpact: nullableText(trimText(output.productImpact, 500)),
+    productOpportunities: output.productOpportunities
+      .map((item) => trimText(item, 300))
+      .filter(Boolean)
+      .slice(0, 4),
+    openQuestions: output.openQuestions
+      .map((item) => trimText(item, 300))
+      .filter(Boolean)
+      .slice(0, 4),
+    confidence: Math.min(1, Math.max(0, output.confidence)),
+    provider,
+    model,
+  };
 }
 
 export function createConfiguredStoryAnalyzer(input?: {
   authorizationToken?: string | null;
+  openAIApiKey?: string | null;
 }): StoryAnalyzer | null {
+  const openAIApiKey =
+    input?.openAIApiKey ?? process.env.OPENAI_API_KEY ?? null;
+  if (openAIApiKey?.trim()) {
+    return new OpenAIStoryAnalyzer({
+      apiKey: openAIApiKey,
+      model: process.env.OPENAI_MODEL || DEFAULT_STORY_ANALYSIS_MODEL,
+    });
+  }
+
   const authorizationToken =
     input?.authorizationToken ??
     process.env.AI_GATEWAY_API_KEY ??
@@ -229,7 +286,7 @@ export function createConfiguredStoryAnalyzer(input?: {
 
   return new VercelGatewayStoryAnalyzer({
     authorizationToken,
-    model: process.env.AI_GATEWAY_MODEL || DEFAULT_STORY_ANALYSIS_MODEL,
+    model: process.env.AI_GATEWAY_MODEL || DEFAULT_GATEWAY_STORY_ANALYSIS_MODEL,
   });
 }
 
