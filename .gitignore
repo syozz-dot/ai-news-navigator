@@ -16,3 +16,4 @@ coverage/
 .agents/
 .codex/
 .impeccable/live/sessions/
+.vercel/
