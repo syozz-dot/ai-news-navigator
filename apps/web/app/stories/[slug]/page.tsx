@@ -7,6 +7,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { FavoriteButton } from "../../../components/favorite-button";
 import {
   contentTypeLabels,
   formatFullDateTime,
@@ -57,14 +58,31 @@ export default async function StoryPage({
           返回情报流
         </Link>
         <header className="storyHero">
-          <div className="storyHeroMeta">
-            <span>
-              {story.contentType
-                ? contentTypeLabels[story.contentType]
-                : "情报"}
-            </span>
-            <span>{story.sourceName ?? "未知信源"}</span>
-            <span>{formatFullDateTime(story.lastPublishedAt)}</span>
+          <div className="storyHeroTopbar">
+            <div className="storyHeroMeta">
+              <span>
+                {story.contentType
+                  ? contentTypeLabels[story.contentType]
+                  : "情报"}
+              </span>
+              <span>{story.sourceName ?? "未知信源"}</span>
+              <span>{formatFullDateTime(story.lastPublishedAt)}</span>
+            </div>
+            <FavoriteButton
+              story={{
+                slug: story.slug,
+                title: displayTitle,
+                originalTitle:
+                  displayTitle === story.title ? null : story.title,
+                summary: story.analysis?.whyItMatters ?? factualSummary,
+                contentType: story.contentType
+                  ? contentTypeLabels[story.contentType]
+                  : "情报",
+                sourceName: story.sourceName ?? "未知信源",
+                publishedAt: story.lastPublishedAt?.toISOString() ?? null,
+                score,
+              }}
+            />
           </div>
           <h1 lang={story.analysis?.translatedTitle ? undefined : "en"}>
             {displayTitle}

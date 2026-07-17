@@ -1,6 +1,7 @@
 import { ArrowUpRight } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 
+import { FavoritesHeaderLink } from "./favorites-header-link";
 import { ThemeToggle } from "./theme-toggle";
 
 export function SiteHeader() {
@@ -14,6 +15,7 @@ export function SiteHeader() {
           <span className="brandName">AI News Navigator</span>
         </Link>
         <div className="headerActions">
+          <FavoritesHeaderLink />
           <a
             className="githubLink"
             href="https://github.com/syozz-dot/ai-news-navigator"
