@@ -4,7 +4,12 @@ import Link from "next/link";
 import { EmptyFeed } from "../components/empty-feed";
 import { SourceHealth } from "../components/source-health";
 import { StoryRow } from "../components/story-row";
-import { contentTypeLabels, formatCalendarDate } from "../lib/presentation";
+import {
+  buildRuleDigest,
+  buildRuleSignalNote,
+  contentTypeLabels,
+  formatCalendarDate,
+} from "../lib/presentation";
 import {
   getSourceHealth,
   getStoryFeed,
@@ -17,7 +22,7 @@ const filters: Array<{ label: string; value?: ContentType }> = [
   { label: "全部" },
   { label: "新闻", value: "news" },
   { label: "论文", value: "paper" },
-  { label: "产品", value: "product" },
+  { label: "产品线索", value: "product" },
   { label: "发布", value: "release" },
 ];
 
@@ -57,7 +62,7 @@ export default async function Home({
   const focusStory = items[0];
   const focusSummary =
     focusStory?.factualSummary ??
-    focusStory?.excerpt ??
+    (focusStory ? buildRuleDigest(focusStory) : null) ??
     "今日焦点正在等待第一条可验证的 Story。";
   const focusFact = focusStory
     ? `这是一条来自 ${focusStory.sourceName ?? "当前信源"} 的${
@@ -68,7 +73,10 @@ export default async function Home({
     : focusSummary;
   const focusImplication =
     focusStory?.whyItMatters ??
-    "产品启示尚未生成，先保留事实与信源边界，不补写结论。";
+    (focusStory ? buildRuleSignalNote(focusStory.matchedSignals) : null) ??
+    "当前没有足够证据支持产品影响判断。";
+  const focusNoteLabel = focusStory?.whyItMatters ? "产品启示" : "规则线索";
+  const focusTitle = focusStory?.translatedTitle ?? focusStory?.title;
 
   return (
     <main>
@@ -86,6 +94,12 @@ export default async function Home({
           <Link className="focusPanel" href={`/stories/${focusStory.slug}`}>
             <div className="focusContent">
               <h2>今日焦点</h2>
+              <h3
+                className="focusTitle"
+                lang={focusStory.translatedTitle ? undefined : "en"}
+              >
+                {focusTitle}
+              </h3>
               <p className="focusSummary">{focusSummary}</p>
               <dl className="focusNotes">
                 <div>
@@ -93,7 +107,7 @@ export default async function Home({
                   <dd>{focusFact}</dd>
                 </div>
                 <div>
-                  <dt>产品启示</dt>
+                  <dt>{focusNoteLabel}</dt>
                   <dd>{focusImplication}</dd>
                 </div>
               </dl>
@@ -130,7 +144,7 @@ export default async function Home({
 
         <dl className="briefStats">
           <div>
-            <dt>今日 Story</dt>
+            <dt>当前筛选</dt>
             <dd>{total}</dd>
           </div>
           <div>
@@ -170,7 +184,7 @@ export default async function Home({
               <h2 id="feed-title">情报流</h2>
               <span>
                 {activeType === "product"
-                  ? "产品视角 · 按产品影响排序"
+                  ? "产品线索 · 按产品影响信号排序"
                   : activeType
                     ? `${contentTypeLabels[activeType]} · 按相关度排序`
                     : "按相关度排序"}
@@ -232,7 +246,7 @@ export default async function Home({
               </li>
             </ol>
           </section>
-          <div className="refreshCadence">每日 09:15 自动更新</div>
+          <div className="refreshCadence">每日 09:15 抓取与聚类</div>
         </aside>
       </div>
     </main>

@@ -8,6 +8,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import {
+  buildRuleDigest,
   contentTypeLabels,
   formatFullDateTime,
   formatScore,
@@ -44,7 +45,9 @@ export default async function StoryPage({
 
   const score = story.overallScore ?? story.relevanceScore;
   const factualSummary =
-    story.analysis?.factualSummary ?? story.factualSummary ?? story.excerpt;
+    story.analysis?.factualSummary ??
+    story.factualSummary ??
+    buildRuleDigest(story);
   const displayTitle = story.analysis?.translatedTitle ?? story.title;
 
   return (
@@ -69,7 +72,9 @@ export default async function StoryPage({
             <p className="storyOriginalTitle" lang="en">
               原文：{story.title}
             </p>
-          ) : null}
+          ) : (
+            <p className="storyOriginalTitle">英文原文索引 · 标题保持原样</p>
+          )}
           {factualSummary ? <p>{factualSummary}</p> : null}
         </header>
 
@@ -88,7 +93,7 @@ export default async function StoryPage({
           </div>
           <div>
             <dt>分析</dt>
-            <dd>{story.analysis ? "已生成" : "待生成"}</dd>
+            <dd>{story.analysis ? "已生成" : "未生成"}</dd>
           </div>
         </dl>
 
@@ -214,7 +219,7 @@ function MissingAnalysis({ label }: { label: string }) {
       <Circle aria-hidden="true" size={16} />
       <div>
         <strong>{label}尚未生成</strong>
-        <span>系统将在下一次自动分析任务中补齐中文解读。</span>
+        <span>当前仅展示原文证据与规则信号，不用规则补写影响结论。</span>
       </div>
     </div>
   );

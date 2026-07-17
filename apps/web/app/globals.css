@@ -554,6 +554,16 @@ button {
   color: var(--ink-secondary);
   line-height: 1.7;
 }
+.emptyStateAction {
+  min-height: 44px;
+  margin-top: 20px;
+  display: inline-flex;
+  align-items: center;
+  border-bottom: 1px solid var(--accent);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 680;
+}
 .feedLimit {
   display: flex;
   align-items: center;
@@ -612,9 +622,9 @@ button {
 
 .storyHero .storyOriginalTitle {
   margin-top: 14px;
-  color: var(--ink-muted);
-  font-family: var(--font-sans);
-  font-size: 0.82rem;
+  color: var(--ink-secondary);
+  font-family: "Manrope Variable", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 12px;
   line-height: 1.55;
 }
 .storyHero > p {
@@ -1376,6 +1386,20 @@ button {
   font-weight: 600;
   letter-spacing: -0.025em;
   line-height: 1.2;
+}
+
+.focusTitle {
+  display: -webkit-box;
+  margin: var(--space-5) 0 0;
+  overflow: hidden;
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.018em;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .focusSummary {

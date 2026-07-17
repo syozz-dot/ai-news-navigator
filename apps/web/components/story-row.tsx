@@ -7,6 +7,7 @@ import Link from "next/link";
 
 import type { StoryFeedItem } from "../lib/queries";
 import {
+  buildRuleDigest,
   contentTypeLabels,
   formatDateTime,
   formatScore,
@@ -25,6 +26,7 @@ export function StoryRow({
 }) {
   const score = story.overallScore ?? story.relevanceScore;
   const implication = story.whyItMatters;
+  const ruleDigest = buildRuleDigest(story);
   const displayTitle = story.translatedTitle ?? story.title;
 
   return (
@@ -61,11 +63,7 @@ export function StoryRow({
         </div>
       </div>
       <div className="storyDistill">
-        {implication ? (
-          <p>{implication}</p>
-        ) : (
-          <p>产品启示尚未生成，先保留事实与信源边界。</p>
-        )}
+        {implication ? <p>{implication}</p> : <p>{ruleDigest}</p>}
         <div className="storyEvidenceState">
           {story.status === "confirmed" ? (
             <CheckCircle aria-hidden="true" size={16} weight="fill" />
@@ -78,7 +76,7 @@ export function StoryRow({
               story.hasAnalysis ? "analysisState ready" : "analysisState"
             }
           >
-            {story.hasAnalysis ? "分析已生成" : "分析待生成"}
+            {story.hasAnalysis ? "中文分析已生成" : "原文与规则导读"}
           </span>
         </div>
       </div>
