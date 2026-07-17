@@ -1317,6 +1317,10 @@ button {
   gap: var(--space-4);
 }
 
+.githubIconLink {
+  flex: 0 0 auto;
+}
+
 .iconButton {
   width: 44px;
   height: 44px;
@@ -1954,10 +1958,6 @@ button {
   .dailyBrief,
   .contentShell {
     width: calc(100% - var(--space-6));
-  }
-
-  .githubLink {
-    display: none;
   }
 
   .brand {

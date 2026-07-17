@@ -1,4 +1,4 @@
-import { ArrowUpRight } from "@phosphor-icons/react/dist/ssr";
+import { GithubLogo } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 
 import { FavoritesHeaderLink } from "./favorites-header-link";
@@ -16,16 +16,17 @@ export function SiteHeader() {
         </Link>
         <div className="headerActions">
           <FavoritesHeaderLink />
+          <ThemeToggle />
           <a
-            className="githubLink"
+            className="iconButton githubIconLink"
             href="https://github.com/syozz-dot/ai-news-navigator"
             target="_blank"
             rel="noreferrer"
+            aria-label="在 GitHub 查看项目"
+            title="GitHub"
           >
-            GitHub
-            <ArrowUpRight aria-hidden="true" size={15} />
+            <GithubLogo aria-hidden="true" size={19} weight="regular" />
           </a>
-          <ThemeToggle />
         </div>
       </div>
     </header>
