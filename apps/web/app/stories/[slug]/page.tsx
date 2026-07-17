@@ -9,7 +9,6 @@ import { notFound } from "next/navigation";
 
 import {
   buildRuleDigest,
-  buildRuleSignalNote,
   contentTypeLabels,
   formatFullDateTime,
   formatScore,
@@ -37,20 +36,14 @@ export async function generateMetadata({
 
 export default async function StoryPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ view?: string }>;
 }) {
-  const [{ slug }, { view }] = await Promise.all([params, searchParams]);
+  const { slug } = await params;
   const story = await getStoryDetail(slug);
   if (!story) notFound();
 
-  const productView = view === "product";
-  const score = productView
-    ? story.productImpactScore
-    : (story.overallScore ?? story.relevanceScore);
-  const scoreLabel = productView ? "产品信号" : "相关度";
+  const score = story.overallScore ?? story.relevanceScore;
   const factualSummary =
     story.analysis?.factualSummary ??
     story.factualSummary ??
@@ -60,17 +53,13 @@ export default async function StoryPage({
   return (
     <main className="storyPage">
       <div className="storyDetailShell">
-        <Link className="backLink" href={productView ? "/?type=product" : "/"}>
+        <Link className="backLink" href="/">
           <ArrowLeft size={17} />
-          {productView ? "返回产品视角" : "返回情报流"}
+          返回情报流
         </Link>
         <header className="storyHero">
           <div className="storyHeroMeta">
-            {productView ? (
-              <span className="productLensTag">产品线索</span>
-            ) : null}
             <span>
-              {productView ? "原始类型：" : ""}
               {story.contentType
                 ? contentTypeLabels[story.contentType]
                 : "情报"}
@@ -93,7 +82,7 @@ export default async function StoryPage({
 
         <dl className="storyMetrics">
           <div>
-            <dt>{scoreLabel}</dt>
+            <dt>相关度</dt>
             <dd>{formatScore(score)}</dd>
           </div>
           <div>
@@ -112,32 +101,6 @@ export default async function StoryPage({
 
         <div className="analysisLayout">
           <article className="analysisBody">
-            {productView ? (
-              <section className="productLensIntro">
-                <h2>产品判断</h2>
-                {story.analysis?.productImpact ? (
-                  <p>{story.analysis.productImpact}</p>
-                ) : (
-                  <MissingAnalysis label="产品影响分析" />
-                )}
-                {story.analysis?.productOpportunities.length ? (
-                  <ul className="opportunityList">
-                    {story.analysis.productOpportunities.map((opportunity) => (
-                      <li key={opportunity}>{opportunity}</li>
-                    ))}
-                  </ul>
-                ) : null}
-                <div className="ruleBasis">
-                  <strong>入选依据</strong>
-                  <p>{buildRuleSignalNote(story.matchedSignals)}</p>
-                  <span>
-                    产品信号 {formatScore(story.productImpactScore)} ·
-                    仅用于筛选， 不把论文直接等同于产品机会。
-                  </span>
-                </div>
-              </section>
-            ) : null}
-
             <section>
               <h2>发生了什么</h2>
               {factualSummary ? (
@@ -163,23 +126,21 @@ export default async function StoryPage({
               </section>
             ) : null}
 
-            {!productView ? (
-              <section>
-                <h2>产品与商业机会</h2>
-                {story.analysis?.productImpact ? (
-                  <p>{story.analysis.productImpact}</p>
-                ) : null}
-                {story.analysis?.productOpportunities.length ? (
-                  <ul className="opportunityList">
-                    {story.analysis.productOpportunities.map((opportunity) => (
-                      <li key={opportunity}>{opportunity}</li>
-                    ))}
-                  </ul>
-                ) : (
-                  <MissingAnalysis label="机会分析" />
-                )}
-              </section>
-            ) : null}
+            <section>
+              <h2>产品与商业机会</h2>
+              {story.analysis?.productImpact ? (
+                <p>{story.analysis.productImpact}</p>
+              ) : null}
+              {story.analysis?.productOpportunities.length ? (
+                <ul className="opportunityList">
+                  {story.analysis.productOpportunities.map((opportunity) => (
+                    <li key={opportunity}>{opportunity}</li>
+                  ))}
+                </ul>
+              ) : (
+                <MissingAnalysis label="机会分析" />
+              )}
+            </section>
 
             {story.analysis?.openQuestions.length ? (
               <section>

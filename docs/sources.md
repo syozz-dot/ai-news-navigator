@@ -26,6 +26,17 @@ The first run accepts at most 50 of the newest feed entries. Later runs use a 24
 
 The adapter distinguishes the original `published` timestamp from `updated`, preserves all authors and categories in metadata, and exposes the PDF as evidence metadata. It can retrieve up to five 100-entry pages, waiting three seconds between API requests, and stops once it crosses the previous-run checkpoint.
 
+### Product Hunt
+
+- Homepage: <https://www.producthunt.com/>
+- Feed: <https://www.producthunt.com/feed>
+- Classification: product launch directory, high reliability for launch metadata
+- Connector: Atom
+- Schedule target: every 60 minutes
+- Content policy: store product name, tagline, Product Hunt link, maker name, and launch timestamp; do not store full page content
+
+Product Hunt entries are stored as `product`, not as news or releases. The feed represents maker-submitted launch information, so product claims remain attributed to Product Hunt and are not treated as independently verified facts. The relevance scorer keeps AI products and filters unrelated launches.
+
 ### GitHub releases
 
 Configured repositories:

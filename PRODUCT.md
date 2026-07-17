@@ -14,7 +14,7 @@ The primary users are AI product managers and founders, especially people withou
 
 ## Product Purpose
 
-AI News Navigator removes informational water from AI news, papers, and releases. It helps users move through a two-stage workflow: quickly find the developments that matter, then understand their product and business implications without having to decode academic language first.
+AI News Navigator removes informational water from AI news, papers, product launches, and software releases. It helps users move through a two-stage workflow: quickly find the developments that matter, then understand their product and business implications without having to decode academic language first.
 
 Success means a user can understand the day's most important AI developments and their product impact within ten minutes.
 
@@ -37,6 +37,15 @@ The product must not become an information waterfall optimized for volume, an ac
 3. Explain importance, not just events. Product and business implications are a core part of the reading experience.
 4. Keep evidence attached. Clearly separate facts, deterministic signals, and generated analysis, and keep conclusions traceable to their sources.
 5. Earn trust through restraint. Prefer clear hierarchy, precise language, and explicit uncertainty over visual noise or exaggerated claims.
+
+## Content Taxonomy
+
+- **News** contains product-relevant AI reporting and official news.
+- **Papers** contains research selected for product relevance, while preserving the original academic source.
+- **Products** contains newly launched AI products collected from launch directories such as Product Hunt. It is a source/content category, not a cross-type “product perspective.”
+- **Releases** contains first-party software and model release records.
+
+The relevance score already prioritizes product usefulness across news, papers, and releases. Do not create a separate product lens that reclassifies those items as products.
 
 ## Accessibility & Inclusion
 

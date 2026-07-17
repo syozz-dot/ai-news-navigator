@@ -24,6 +24,10 @@ export {
   openAiNewsSource,
 } from "./definitions/openai-news.js";
 export {
+  createProductHuntAdapter,
+  productHuntSource,
+} from "./definitions/product-hunt.js";
+export {
   RssSourceAdapter,
   type RssSourceAdapterOptions,
 } from "./rss-adapter.js";

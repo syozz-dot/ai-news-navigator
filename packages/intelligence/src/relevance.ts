@@ -52,6 +52,7 @@ const AI_SIGNALS: WeightedSignal[] = [
       "llama",
       "qwen",
       "deepseek",
+      "kimi",
     ],
     weight: 0.34,
   },
@@ -180,7 +181,7 @@ const PRODUCT_SIGNALS: WeightedSignal[] = [
 const CONTENT_PRIOR: Record<ContentType, number> = {
   news: 0.08,
   paper: 0,
-  product: 0.1,
+  product: 0.16,
   release: 0.12,
   post: 0.04,
   other: 0,
@@ -253,7 +254,9 @@ export function scoreItemRelevance(input: RelevanceInput): RelevanceAssessment {
   const ai = signalScore(title, body, AI_SIGNALS);
   const product = signalScore(title, body, PRODUCT_SIGNALS);
   const aiCentralityScore = Math.max(ai.score, categoryPrior(input.metadata));
-  const productImpactScore = product.score;
+  const implicitProductLaunch = input.contentType === "product" ? 0.26 : 0;
+  const productImpactScore =
+    1 - (1 - product.score) * (1 - implicitProductLaunch);
   const relevanceScore = Math.min(
     1,
     aiCentralityScore * 0.65 +
@@ -266,6 +269,12 @@ export function scoreItemRelevance(input: RelevanceInput): RelevanceAssessment {
     ...ai.matches.map((signal) => `ai:${signal}`),
     ...product.matches.map((signal) => `product:${signal}`),
   ];
+  if (
+    input.contentType === "product" &&
+    !matchedSignals.includes("product:launch")
+  ) {
+    matchedSignals.push("product:launch");
+  }
 
   return {
     scorerVersion: RELEVANCE_SCORER_VERSION,

@@ -3,9 +3,11 @@ import {
   createArxivAiAdapter,
   createOllamaReleaseAdapter,
   createOpenAiNewsAdapter,
+  createProductHuntAdapter,
   createVllmReleaseAdapter,
   ollamaReleaseSource,
   openAiNewsSource,
+  productHuntSource,
   vllmReleaseSource,
   type SourceAdapter,
   type SourceDefinition,
@@ -21,6 +23,10 @@ export function createConfiguredSources(): ConfiguredSource[] {
     {
       definition: openAiNewsSource,
       adapter: createOpenAiNewsAdapter(),
+    },
+    {
+      definition: productHuntSource,
+      adapter: createProductHuntAdapter(),
     },
     {
       definition: arxivAiSource,

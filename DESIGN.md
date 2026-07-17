@@ -175,9 +175,10 @@ The system uses no shadows. Depth comes from full-width tonal planes, section bo
 
 ### Navigation
 
-- **Style:** A 68px full-width deep-pine bar with off-white identity, centered primary links, and a square N mark. The current route uses a restrained off-white underline.
-- **States:** Hover increases text contrast only; active uses the underline; focus uses a visible two-pixel outline. No pills and no translucent glass layer.
-- **Mobile:** Collapse secondary links before reducing tap targets. The brand and theme control remain visible.
+- **Style:** A 68px full-width deep-pine identity bar with the square N mark and product name on the left, and external actions on the right.
+- **Scope:** Content navigation lives in the filter row below the daily brief. Do not duplicate the same News / Papers / Products / Releases destinations in the header.
+- **States:** Hover increases text contrast only; focus uses a visible two-pixel outline. No pills and no translucent glass layer.
+- **Mobile:** Keep the brand and essential external action visible without shrinking tap targets.
 
 ### Daily Focus
 
@@ -189,6 +190,7 @@ The system uses no shadows. Depth comes from full-width tonal planes, section bo
 ### Filters
 
 - **Style:** Text tabs on the canvas, spaced generously enough for touch. The selected filter uses ink text and a deep-pine underline.
+- **Taxonomy:** Products means newly launched products from product-discovery sources; it is not a cross-type product-value lens. News, papers, and releases already use product relevance in ranking.
 - **States:** Hover shifts to primary ink; focus is outlined; active never becomes a filled pill.
 
 ### Story Rows

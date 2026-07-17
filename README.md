@@ -69,7 +69,7 @@ pnpm sources:health
 pnpm dev:web
 ```
 
-Configured sources currently include [OpenAI News](https://openai.com/news/), arXiv AI categories, and stable releases from Ollama and vLLM. See [docs/sources.md](docs/sources.md) for source policy and adapter behavior.
+Configured sources currently include [OpenAI News](https://openai.com/news/), [Product Hunt](https://www.producthunt.com/), arXiv AI categories, and stable releases from Ollama and vLLM. See [docs/sources.md](docs/sources.md) for source policy and adapter behavior.
 
 Scheduling is database-driven with exponential failure backoff and per-source leases. See [docs/operations.md](docs/operations.md) for commands, health semantics, and the deployment boundary.
 

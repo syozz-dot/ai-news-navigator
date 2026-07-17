@@ -22,6 +22,23 @@ describe("scoreItemRelevance", () => {
     );
   });
 
+  it("keeps AI products from launch directories without generic product noise", () => {
+    const aiProduct = scoreItemRelevance({
+      contentType: "product",
+      title: "Aye",
+      excerpt: "Your teachable AI intern for everyday browser work",
+    });
+    const nonAiProduct = scoreItemRelevance({
+      contentType: "product",
+      title: "Minimal Calendar",
+      excerpt: "A clean calendar for small creative teams",
+    });
+
+    expect(aiProduct.isRelevant).toBe(true);
+    expect(aiProduct.matchedSignals).toContain("product:launch");
+    expect(nonAiProduct.isRelevant).toBe(false);
+  });
+
   it("filters category-adjacent papers without meaningful AI centrality", () => {
     const result = scoreItemRelevance({
       contentType: "paper",

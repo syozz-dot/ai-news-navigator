@@ -13,6 +13,7 @@ describe("configured sources", () => {
 
     expect(registry.list().map((source) => source.key)).toEqual([
       "openai-news",
+      "product-hunt",
       "arxiv-ai",
       "github-ollama-ollama-releases",
       "github-vllm-project-vllm-releases",
