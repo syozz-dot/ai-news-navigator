@@ -67,7 +67,9 @@ export default async function StoryPage({
             <span>{story.sourceName ?? "未知信源"}</span>
             <span>{formatFullDateTime(story.lastPublishedAt)}</span>
           </div>
-          <h1>{displayTitle}</h1>
+          <h1 lang={story.analysis?.translatedTitle ? undefined : "en"}>
+            {displayTitle}
+          </h1>
           {story.analysis?.translatedTitle ? (
             <p className="storyOriginalTitle" lang="en">
               原文：{story.title}

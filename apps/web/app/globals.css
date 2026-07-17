@@ -588,9 +588,12 @@ button {
 
 .storyPage {
   min-height: 80dvh;
+  max-width: 100%;
+  overflow-x: clip;
 }
 .storyDetailShell {
   width: min(calc(100% - 40px), 1320px);
+  max-width: 100%;
   min-width: 0;
   margin: 0 auto;
 }
@@ -603,7 +606,9 @@ button {
   font-size: 12px;
 }
 .storyHero {
+  width: 100%;
   max-width: 1030px;
+  min-width: 0;
   padding: 62px 0 52px;
 }
 .storyHeroMeta {
@@ -614,13 +619,15 @@ button {
   font-size: 11px;
 }
 .storyHero h1 {
+  max-width: 100%;
   margin: 26px 0 0;
   font-size: clamp(38px, 5.7vw, 78px);
   font-weight: 610;
   letter-spacing: -0.04em;
   line-height: 1.04;
-  overflow-wrap: anywhere;
-  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  white-space: normal;
 }
 
 .storyHero .storyOriginalTitle {
@@ -636,6 +643,7 @@ button {
   color: var(--ink-secondary);
   font-size: clamp(17px, 1.7vw, 22px);
   line-height: 1.7;
+  overflow-wrap: anywhere;
 }
 .storyMetrics {
   margin: 0;
@@ -661,10 +669,17 @@ button {
   font-size: 18px;
 }
 .analysisLayout {
+  min-width: 0;
   display: grid;
   grid-template-columns: minmax(0, 8fr) minmax(290px, 4fr);
   gap: 72px;
   padding-top: 72px;
+}
+.analysisBody,
+.evidenceRail,
+.evidenceList,
+.evidenceList > a {
+  min-width: 0;
 }
 .analysisBody section {
   padding-bottom: 62px;
@@ -781,6 +796,7 @@ button {
   font-size: 13px;
   line-height: 1.5;
   overflow-wrap: anywhere;
+  word-break: break-word;
   transition: color 150ms ease;
 }
 .evidenceList a:hover h3 {
@@ -1148,6 +1164,11 @@ button {
   }
   .storyHero {
     padding: 42px 0 38px;
+  }
+  .storyDetailShell {
+    width: auto;
+    margin-right: 14px;
+    margin-left: 14px;
   }
   .storyHero h1 {
     font-size: 34px;
