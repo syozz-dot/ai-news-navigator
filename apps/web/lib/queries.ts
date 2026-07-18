@@ -65,6 +65,16 @@ export interface SourceHealthItem {
   consecutiveFailures: number;
 }
 
+export interface DailyIssue {
+  issueDate: string;
+  items: StoryFeedItem[];
+  counts: Record<"news" | "paper" | "product" | "model", number>;
+  total: number;
+  readingMinutes: number;
+  previousDate: string | null;
+  nextDate: string | null;
+}
+
 export interface StoryEvidenceItem {
   id: string;
   role: typeof storyItems.$inferSelect.role;
@@ -267,6 +277,120 @@ export const getStoryFeed = cache(
     return {
       items: await hydrateFeedRows(baseRows),
       total: Number(totals[0]?.count ?? 0),
+    };
+  },
+);
+
+const dailyContentTypes: ContentType[] = ["news", "paper", "product", "model"];
+
+function isCalendarDate(value: string | undefined): value is string {
+  return Boolean(value && /^\d{4}-\d{2}-\d{2}$/.test(value));
+}
+
+function estimateChineseReadingMinutes(itemsToRead: StoryFeedItem[]): number {
+  if (itemsToRead.length === 0) return 0;
+  const characters = itemsToRead.reduce((total, item) => {
+    const copy = [
+      item.translatedTitle ?? item.title,
+      item.factualSummary ?? "",
+      item.whyItMatters ?? "",
+    ].join("");
+    return total + copy.replace(/\s/g, "").length;
+  }, 0);
+  return Math.max(1, Math.ceil(characters / 450));
+}
+
+export const getDailyIssue = cache(
+  async (requestedDate?: string): Promise<DailyIssue> => {
+    const { db } = getDatabaseConnection();
+    const primaryItems = alias(items, "daily_primary_items");
+    const dateExpression = sql<string>`to_char(timezone('Asia/Shanghai', ${stories.createdAt}), 'YYYY-MM-DD')`;
+    const publicDailyStories = and(
+      inArray(stories.status, publicStoryStatuses),
+      inArray(primaryItems.contentType, dailyContentTypes),
+    );
+
+    const dateRows = await db
+      .selectDistinct({ date: dateExpression })
+      .from(stories)
+      .leftJoin(primaryItems, eq(stories.primaryItemId, primaryItems.id))
+      .where(publicDailyStories)
+      .orderBy(desc(dateExpression));
+    const availableDates = dateRows.map((row) => row.date);
+    const issueDate = isCalendarDate(requestedDate)
+      ? requestedDate
+      : (availableDates[0] ??
+        new Intl.DateTimeFormat("en-CA", {
+          timeZone: "Asia/Shanghai",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        }).format(new Date()));
+
+    const baseRows = await db
+      .select({
+        id: stories.id,
+        slug: stories.slug,
+        status: stories.status,
+        title: stories.title,
+        factualSummary: stories.factualSummary,
+        firstPublishedAt: stories.firstPublishedAt,
+        lastPublishedAt: stories.lastPublishedAt,
+        independentSourceCount: stories.independentSourceCount,
+        relevanceScore: stories.relevanceScore,
+        overallScore: stories.overallScore,
+        confidence: stories.confidence,
+        primaryItemId: stories.primaryItemId,
+        excerpt: primaryItems.excerpt,
+        originalUrl: primaryItems.originalUrl,
+        contentType: primaryItems.contentType,
+        sourceName: sources.name,
+        sourceSlug: sources.slug,
+      })
+      .from(stories)
+      .leftJoin(primaryItems, eq(stories.primaryItemId, primaryItems.id))
+      .leftJoin(sources, eq(primaryItems.sourceId, sources.id))
+      .where(and(publicDailyStories, eq(dateExpression, issueDate)))
+      .orderBy(
+        desc(
+          sql`coalesce(${stories.overallScore}, ${stories.relevanceScore}, 0)`,
+        ),
+        desc(stories.lastPublishedAt),
+      )
+      .limit(80);
+
+    const hydrated = await hydrateFeedRows(baseRows);
+    const counts: DailyIssue["counts"] = {
+      news: 0,
+      paper: 0,
+      product: 0,
+      model: 0,
+    };
+    const perType = new Map<ContentType, number>();
+    const dailyItems = hydrated.filter((item) => {
+      if (!item.hasAnalysis || !item.factualSummary || !item.contentType)
+        return false;
+      const selected = perType.get(item.contentType) ?? 0;
+      if (selected >= 5) return false;
+      perType.set(item.contentType, selected + 1);
+      counts[item.contentType as keyof DailyIssue["counts"]] += 1;
+      return true;
+    });
+
+    const currentIndex = availableDates.indexOf(issueDate);
+    const previousDate =
+      currentIndex >= 0 ? (availableDates[currentIndex + 1] ?? null) : null;
+    const nextDate =
+      currentIndex > 0 ? (availableDates[currentIndex - 1] ?? null) : null;
+
+    return {
+      issueDate,
+      items: dailyItems,
+      counts,
+      total: dailyItems.length,
+      readingMinutes: estimateChineseReadingMinutes(dailyItems),
+      previousDate,
+      nextDate,
     };
   },
 );

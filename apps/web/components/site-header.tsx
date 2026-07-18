@@ -15,6 +15,9 @@ export function SiteHeader() {
           <span className="brandName">AI News Navigator</span>
         </Link>
         <div className="headerActions">
+          <Link className="dailyHeaderLink" href="/daily">
+            日报
+          </Link>
           <FavoritesHeaderLink />
           <ThemeToggle />
           <a

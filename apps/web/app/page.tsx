@@ -1,15 +1,11 @@
 import { ArrowDown, ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 
+import { DailyEntryRail } from "../components/daily-entry-rail";
 import { EmptyFeed } from "../components/empty-feed";
-import { SourceHealth } from "../components/source-health";
 import { StoryRow } from "../components/story-row";
 import { contentTypeLabels, formatCalendarDate } from "../lib/presentation";
-import {
-  getSourceHealth,
-  getStoryFeed,
-  type ContentType,
-} from "../lib/queries";
+import { getDailyIssue, getStoryFeed, type ContentType } from "../lib/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -45,16 +41,10 @@ export default async function Home({
 
   const { type } = await searchParams;
   const activeType = parseContentType(type);
-  const [{ items, total }, sourceHealth] = await Promise.all([
+  const [{ items, total }, dailyIssue] = await Promise.all([
     getStoryFeed(activeType),
-    getSourceHealth(),
+    getDailyIssue(),
   ]);
-  const confirmed = items.filter(
-    (story) => story.status === "confirmed",
-  ).length;
-  const activeSources = sourceHealth.filter(
-    (source) => source.status === "active",
-  ).length;
   const focusStory = items[0];
   const focusSummary =
     focusStory?.factualSummary ??
@@ -131,23 +121,37 @@ export default async function Home({
           </div>
         )}
 
-        <dl className="briefStats">
-          <div>
-            <dt>当前筛选</dt>
-            <dd>{total}</dd>
+        <aside className="briefOverview" aria-labelledby="brief-overview-title">
+          <div className="briefOverviewHeader">
+            <div>
+              <span>DAILY OVERVIEW</span>
+              <h2 id="brief-overview-title">今日概览</h2>
+            </div>
+            <strong>{dailyIssue.total}</strong>
           </div>
-          <div>
-            <dt>信源健康</dt>
-            <dd>
-              {activeSources}
-              <span> / {sourceHealth.length}</span>
-            </dd>
-          </div>
-          <div>
-            <dt>本页多源确认</dt>
-            <dd>{confirmed}</dd>
-          </div>
-        </dl>
+          <dl>
+            <div>
+              <dt>新闻</dt>
+              <dd>{dailyIssue.counts.news}</dd>
+            </div>
+            <div>
+              <dt>论文</dt>
+              <dd>{dailyIssue.counts.paper}</dd>
+            </div>
+            <div>
+              <dt>产品</dt>
+              <dd>{dailyIssue.counts.product}</dd>
+            </div>
+            <div>
+              <dt>模型</dt>
+              <dd>{dailyIssue.counts.model}</dd>
+            </div>
+          </dl>
+          <Link href={`/daily?date=${dailyIssue.issueDate}`}>
+            阅读今日日报
+            <ArrowRight aria-hidden="true" size={15} />
+          </Link>
+        </aside>
       </section>
 
       <div className="contentShell">
@@ -215,27 +219,7 @@ export default async function Home({
           ) : null}
         </section>
 
-        <aside className="signalRail" aria-label="情报流状态">
-          <SourceHealth sources={sourceHealth} />
-          <section className="railSection methodSection">
-            <h2>阅读边界</h2>
-            <ol>
-              <li>
-                <strong>事实</strong>
-                <span>来自原文与多个独立信源</span>
-              </li>
-              <li>
-                <strong>信号</strong>
-                <span>由可解释规则计算，不替代判断</span>
-              </li>
-              <li>
-                <strong>分析</strong>
-                <span>未生成时明确留空，不补写结论</span>
-              </li>
-            </ol>
-          </section>
-          <div className="refreshCadence">每日 09:15 抓取与聚类</div>
-        </aside>
+        <DailyEntryRail issue={dailyIssue} />
       </div>
     </main>
   );
