@@ -374,7 +374,9 @@ export const getTopicIndex = cache(async (): Promise<TopicIndexItem[]> => {
   const { db } = getDatabaseConnection();
   const primaryItems = alias(items, "topic_primary_items");
   const curatedSlugs = CURATED_TOPICS.map((topic) => topic.slug);
-  const recentSince = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const recentSince = new Date(
+    Date.now() - 7 * 24 * 60 * 60 * 1000,
+  ).toISOString();
   const publicTopicStories = and(
     inArray(stories.status, publicStoryStatuses),
     ne(primaryItems.contentType, "release"),
@@ -386,7 +388,7 @@ export const getTopicIndex = cache(async (): Promise<TopicIndexItem[]> => {
       .select({
         slug: topics.slug,
         total: count(),
-        recentCount: sql<number>`count(*) filter (where ${stories.lastPublishedAt} >= ${recentSince})`,
+        recentCount: sql<number>`count(*) filter (where ${stories.lastPublishedAt} >= ${recentSince}::timestamptz)`,
       })
       .from(storyTopics)
       .innerJoin(topics, eq(storyTopics.topicId, topics.id))
