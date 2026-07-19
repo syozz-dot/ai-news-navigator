@@ -16,15 +16,18 @@ import {
   count,
   desc,
   eq,
+  ilike,
   inArray,
   ne,
   notInArray,
+  or,
   sql,
 } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { cache } from "react";
 
 import { getDatabaseConnection } from "./database";
+import { normalizeSearchQuery, storySearchTerms } from "./search";
 
 export type ContentType = typeof items.$inferSelect.contentType;
 export type StoryStatus = typeof stories.$inferSelect.status;
@@ -241,10 +244,10 @@ async function hydrateFeedRows(
 }
 
 export const getStoryFeed = cache(
-  async (contentType?: ContentType, limit = 30) => {
+  async (contentType?: ContentType, limit = 30, rawSearchQuery?: string) => {
     const { db } = getDatabaseConnection();
     const primaryItems = alias(items, "primary_items");
-    const where = contentType
+    const baseWhere = contentType
       ? and(
           inArray(stories.status, publicStoryStatuses),
           eq(primaryItems.contentType, contentType),
@@ -253,6 +256,39 @@ export const getStoryFeed = cache(
           inArray(stories.status, publicStoryStatuses),
           ne(primaryItems.contentType, "release"),
         );
+    const searchQuery = normalizeSearchQuery(rawSearchQuery);
+    const searchConditions = searchQuery
+      ? storySearchTerms(searchQuery).map((term) => {
+          const pattern = `%${term}%`;
+          const analysisMatches = db
+            .select({ storyId: storyAnalyses.storyId })
+            .from(storyAnalyses)
+            .where(
+              or(
+                ilike(storyAnalyses.translatedTitle, pattern),
+                ilike(storyAnalyses.factualSummary, pattern),
+                ilike(storyAnalyses.whyItMatters, pattern),
+              ),
+            );
+          const topicMatches = db
+            .select({ storyId: storyTopics.storyId })
+            .from(storyTopics)
+            .innerJoin(topics, eq(storyTopics.topicId, topics.id))
+            .where(ilike(topics.name, pattern));
+
+          return or(
+            ilike(stories.title, pattern),
+            ilike(stories.factualSummary, pattern),
+            ilike(primaryItems.title, pattern),
+            ilike(primaryItems.originalTitle, pattern),
+            ilike(primaryItems.excerpt, pattern),
+            ilike(sources.name, pattern),
+            inArray(stories.id, analysisMatches),
+            inArray(stories.id, topicMatches),
+          );
+        })
+      : [];
+    const where = and(baseWhere, ...searchConditions);
     const relevanceSort = desc(
       sql`coalesce(${stories.overallScore}, ${stories.relevanceScore}, 0)`,
     );
@@ -292,6 +328,7 @@ export const getStoryFeed = cache(
         .select({ count: count() })
         .from(stories)
         .leftJoin(primaryItems, eq(stories.primaryItemId, primaryItems.id))
+        .leftJoin(sources, eq(primaryItems.sourceId, sources.id))
         .where(where),
     ]);
 

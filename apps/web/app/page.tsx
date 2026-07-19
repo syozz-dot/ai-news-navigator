@@ -1,10 +1,16 @@
-import { ArrowDown, ArrowRight } from "@phosphor-icons/react/dist/ssr";
+import {
+  ArrowDown,
+  ArrowRight,
+  MagnifyingGlass,
+  X,
+} from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 
 import { EmptyFeed } from "../components/empty-feed";
 import { StoryRow } from "../components/story-row";
 import { contentTypeLabels, formatCalendarDate } from "../lib/presentation";
 import { getDailyIssue, getStoryFeed, type ContentType } from "../lib/queries";
+import { normalizeSearchQuery } from "../lib/search";
 
 export const dynamic = "force-dynamic";
 
@@ -31,17 +37,26 @@ function parseContentType(value: string | undefined): ContentType | undefined {
     : undefined;
 }
 
+function feedHref(contentType?: ContentType, searchQuery?: string) {
+  const params = new URLSearchParams();
+  if (contentType) params.set("type", contentType);
+  if (searchQuery) params.set("q", searchQuery);
+  const query = params.toString();
+  return query ? `/?${query}` : "/";
+}
+
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ type?: string }>;
+  searchParams: Promise<{ type?: string; q?: string }>;
 }) {
   if (!process.env.DATABASE_URL) return <DatabaseSetupState />;
 
-  const { type } = await searchParams;
+  const { type, q } = await searchParams;
   const activeType = parseContentType(type);
+  const searchQuery = normalizeSearchQuery(q);
   const [{ items, total }, dailyIssue] = await Promise.all([
-    getStoryFeed(activeType),
+    getStoryFeed(activeType, 30, searchQuery),
     getDailyIssue(),
   ]);
   const focusStory = dailyIssue.items[0];
@@ -167,7 +182,7 @@ export default async function Home({
                   <Link
                     key={filter.label}
                     className={active ? "active" : undefined}
-                    href={filter.value ? `/?type=${filter.value}` : "/"}
+                    href={feedHref(filter.value, searchQuery)}
                     aria-current={active ? "page" : undefined}
                   >
                     {filter.label}
@@ -175,16 +190,38 @@ export default async function Home({
                 );
               })}
             </nav>
-            <div className="feedSort">
+            <form className="feedSearch" action="/" role="search">
               <h2 id="feed-title">情报流</h2>
-              <span>
-                {activeType
-                  ? activeType === "product"
-                    ? "产品 · 按发布时间排序"
-                    : `${contentTypeLabels[activeType]} · 按相关度排序`
-                  : "按相关度排序"}
-              </span>
-            </div>
+              {activeType ? (
+                <input type="hidden" name="type" value={activeType} />
+              ) : null}
+              <label htmlFor="story-search">搜索</label>
+              <div className="feedSearchField">
+                <MagnifyingGlass aria-hidden="true" size={16} />
+                <input
+                  id="story-search"
+                  name="q"
+                  type="search"
+                  defaultValue={searchQuery}
+                  maxLength={80}
+                  autoComplete="off"
+                  placeholder="标题、主题或摘要"
+                />
+                {searchQuery ? (
+                  <Link
+                    className="feedSearchClear"
+                    href={feedHref(activeType)}
+                    aria-label="清除搜索"
+                    title="清除搜索"
+                  >
+                    <X aria-hidden="true" size={15} />
+                  </Link>
+                ) : null}
+              </div>
+              {searchQuery ? (
+                <span className="feedSearchCount">{total} 条结果</span>
+              ) : null}
+            </form>
           </div>
 
           {items.length > 0 ? (
@@ -199,7 +236,11 @@ export default async function Home({
           ) : null}
 
           {items.length === 0 ? (
-            <EmptyFeed filtered={Boolean(activeType)} />
+            <EmptyFeed
+              filtered={Boolean(activeType)}
+              searchQuery={searchQuery}
+              clearHref={feedHref(activeType)}
+            />
           ) : (
             <div className="storyList">
               {items.map((story, index) => (

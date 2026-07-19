@@ -1,7 +1,28 @@
-import { Newspaper } from "@phosphor-icons/react/dist/ssr";
+import { MagnifyingGlass, Newspaper } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 
-export function EmptyFeed({ filtered }: { filtered: boolean }) {
+export function EmptyFeed({
+  filtered,
+  searchQuery,
+  clearHref = "/",
+}: {
+  filtered: boolean;
+  searchQuery?: string | undefined;
+  clearHref?: string;
+}) {
+  if (searchQuery) {
+    return (
+      <section className="emptyState">
+        <MagnifyingGlass aria-hidden="true" size={32} weight="light" />
+        <h2>没有找到“{searchQuery}”</h2>
+        <p>试试更短的关键词，或切换内容分类后再次搜索。</p>
+        <Link className="emptyStateAction" href={clearHref}>
+          清除搜索
+        </Link>
+      </section>
+    );
+  }
+
   return (
     <section className="emptyState">
       <Newspaper aria-hidden="true" size={32} weight="light" />

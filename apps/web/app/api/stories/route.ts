@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getStoryFeed, type ContentType } from "../../../lib/queries";
+import { normalizeSearchQuery } from "../../../lib/search";
 
 export const dynamic = "force-dynamic";
 
@@ -24,9 +25,10 @@ export async function GET(request: Request) {
   const limit = Number.isFinite(requestedLimit)
     ? Math.min(100, Math.max(1, Math.floor(requestedLimit)))
     : 30;
+  const searchQuery = normalizeSearchQuery(searchParams.get("q"));
 
   try {
-    const result = await getStoryFeed(contentType, limit);
+    const result = await getStoryFeed(contentType, limit, searchQuery);
     return NextResponse.json(result);
   } catch (error) {
     return NextResponse.json(

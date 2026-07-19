@@ -1553,14 +1553,13 @@ button {
   gap: var(--space-5);
 }
 
-.feedSort {
+.feedSearch {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  text-align: right;
+  gap: var(--space-2);
 }
 
-.feedToolbar .feedSort h2 {
+.feedSearch h2 {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -1570,10 +1569,66 @@ button {
   white-space: nowrap;
 }
 
-.feedToolbar .feedSort span {
-  margin: 0;
+.feedSearch > label,
+.feedSearchCount {
   color: var(--ink-secondary);
   font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.feedSearchField {
+  width: min(300px, 32vw);
+  min-height: 44px;
+  padding: 0 var(--space-2) 0 var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  border-bottom: 1px solid var(--line-strong);
+  color: var(--ink-tertiary);
+  transition:
+    border-color 150ms ease,
+    color 150ms ease;
+}
+
+.feedSearchField:focus-within {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.feedSearchField input {
+  width: 100%;
+  min-width: 0;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+}
+
+.feedSearchField input::placeholder {
+  color: var(--ink-tertiary);
+  opacity: 1;
+}
+
+.feedSearchField input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.feedSearchClear {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  color: var(--ink-secondary);
+}
+
+.feedSearchClear:hover {
+  color: var(--accent);
 }
 
 .filterNav {
@@ -2029,9 +2084,13 @@ button {
     gap: var(--space-5);
   }
 
-  .feedSort {
+  .feedSearch {
     width: 100%;
-    justify-content: flex-end;
+    justify-content: flex-start;
+  }
+
+  .feedSearchField {
+    width: min(100%, 360px);
   }
 
   .storyRow {
