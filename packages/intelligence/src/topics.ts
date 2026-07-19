@@ -105,12 +105,14 @@ interface TopicRule {
   slug: CuratedTopicSlug;
   signals?: readonly string[];
   phrases: readonly string[];
+  minimumBodyMatches?: number;
 }
 
 const TOPIC_RULES: readonly TopicRule[] = [
   {
     slug: "agent",
     signals: ["ai:agents", "ai:tool-use"],
+    minimumBodyMatches: 2,
     phrases: [
       "ai agent",
       "agentic",
@@ -350,7 +352,10 @@ export function classifyStoryTopics(
     const signalMatches = (rule.signals ?? []).filter((signal) =>
       signals.has(signal),
     );
-    if (titleMatches.length === 0 && bodyMatches.length === 0) {
+    const hasTextEvidence =
+      titleMatches.length > 0 ||
+      bodyMatches.length >= (rule.minimumBodyMatches ?? 1);
+    if (!hasTextEvidence) {
       return [];
     }
 

@@ -72,4 +72,15 @@ describe("curated Story topics", () => {
       "safety-alignment",
     );
   });
+
+  it("does not classify a model as Agent from one incidental body mention", () => {
+    const matches = classifyStoryTopics({
+      title: "Hy3 open-weight model released",
+      factualSummary:
+        "The model lowers deployment costs while improving agent capabilities.",
+      matchedSignals: ["ai:agents"],
+    });
+
+    expect(matches.map((match) => match.slug)).not.toContain("agent");
+  });
 });
