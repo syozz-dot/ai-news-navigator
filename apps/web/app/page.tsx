@@ -195,13 +195,13 @@ export default async function Home({
               {activeType ? (
                 <input type="hidden" name="type" value={activeType} />
               ) : null}
-              <label htmlFor="story-search">搜索</label>
               <div className="feedSearchField">
                 <MagnifyingGlass aria-hidden="true" size={16} />
                 <input
                   id="story-search"
                   name="q"
                   type="search"
+                  aria-label="搜索情报"
                   defaultValue={searchQuery}
                   maxLength={80}
                   autoComplete="off"

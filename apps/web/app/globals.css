@@ -1569,7 +1569,6 @@ button {
   white-space: nowrap;
 }
 
-.feedSearch > label,
 .feedSearchCount {
   color: var(--ink-secondary);
   font-size: 12px;
