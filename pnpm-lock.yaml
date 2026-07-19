@@ -38,6 +38,9 @@ importers:
       '@ai-news-navigator/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@ai-news-navigator/intelligence':
+        specifier: workspace:*
+        version: link:../../packages/intelligence
       '@ai-news-navigator/jobs':
         specifier: workspace:*
         version: link:../../jobs

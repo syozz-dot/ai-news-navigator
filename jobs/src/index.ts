@@ -45,6 +45,10 @@ export {
   type DueSourceIngestionResult,
 } from "./scheduled-work.js";
 export {
+  runTopicClassification,
+  type TopicClassificationResult,
+} from "./topic-classification.js";
+export {
   createConfiguredStoryAnalyzer,
   DeepSeekStoryAnalyzer,
   DEFAULT_DEEPSEEK_BASE_URL,

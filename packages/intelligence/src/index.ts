@@ -12,3 +12,14 @@ export {
   type RelevanceAssessment,
   type RelevanceInput,
 } from "./relevance.js";
+export {
+  classifyStoryTopics,
+  CURATED_TOPICS,
+  findCuratedTopic,
+  TOPIC_CLASSIFIER_VERSION,
+  type CuratedTopic,
+  type CuratedTopicGroup,
+  type CuratedTopicSlug,
+  type TopicClassification,
+  type TopicClassificationInput,
+} from "./topics.js";

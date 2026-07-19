@@ -26,9 +26,15 @@ export async function GET(request: Request) {
     ? Math.min(100, Math.max(1, Math.floor(requestedLimit)))
     : 30;
   const searchQuery = normalizeSearchQuery(searchParams.get("q"));
+  const topicSlug = searchParams.get("topic") ?? undefined;
 
   try {
-    const result = await getStoryFeed(contentType, limit, searchQuery);
+    const result = await getStoryFeed(
+      contentType,
+      limit,
+      searchQuery,
+      topicSlug,
+    );
     return NextResponse.json(result);
   } catch (error) {
     return NextResponse.json(

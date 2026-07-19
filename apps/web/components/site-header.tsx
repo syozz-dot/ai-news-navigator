@@ -1,4 +1,4 @@
-import { GithubLogo, Newspaper } from "@phosphor-icons/react/dist/ssr";
+import { GithubLogo, Newspaper, Tag } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 
 import { FavoritesHeaderLink } from "./favorites-header-link";
@@ -22,6 +22,14 @@ export function SiteHeader() {
             title="情报简报"
           >
             <Newspaper aria-hidden="true" size={19} weight="regular" />
+          </Link>
+          <Link
+            className="iconButton topicsHeaderLink"
+            href="/topics"
+            aria-label="按主题浏览 AI 情报"
+            title="主题地图"
+          >
+            <Tag aria-hidden="true" size={19} weight="regular" />
           </Link>
           <FavoritesHeaderLink />
           <ThemeToggle />

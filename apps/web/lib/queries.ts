@@ -11,6 +11,12 @@ import {
   type ReportSnapshotContent,
 } from "@ai-news-navigator/database";
 import {
+  CURATED_TOPICS,
+  findCuratedTopic,
+  type CuratedTopic,
+  type CuratedTopicSlug,
+} from "@ai-news-navigator/intelligence";
+import {
   and,
   asc,
   count,
@@ -57,6 +63,12 @@ export interface StoryFeedItem {
   hasAnalysis: boolean;
   topics: string[];
 }
+
+export type TopicIndexItem = CuratedTopic & {
+  total: number;
+  recentCount: number;
+  latestStory: StoryFeedItem | null;
+};
 
 export interface SourceHealthItem {
   id: string;
@@ -244,10 +256,22 @@ async function hydrateFeedRows(
 }
 
 export const getStoryFeed = cache(
-  async (contentType?: ContentType, limit = 30, rawSearchQuery?: string) => {
+  async (
+    contentType?: ContentType,
+    limit = 30,
+    rawSearchQuery?: string,
+    topicSlug?: string,
+  ) => {
     const { db } = getDatabaseConnection();
     const primaryItems = alias(items, "primary_items");
-    const baseWhere = contentType
+    const topicMatches = topicSlug
+      ? db
+          .select({ storyId: storyTopics.storyId })
+          .from(storyTopics)
+          .innerJoin(topics, eq(storyTopics.topicId, topics.id))
+          .where(eq(topics.slug, topicSlug))
+      : undefined;
+    const contentWhere = contentType
       ? and(
           inArray(stories.status, publicStoryStatuses),
           eq(primaryItems.contentType, contentType),
@@ -256,6 +280,9 @@ export const getStoryFeed = cache(
           inArray(stories.status, publicStoryStatuses),
           ne(primaryItems.contentType, "release"),
         );
+    const baseWhere = topicMatches
+      ? and(contentWhere, inArray(stories.id, topicMatches))
+      : contentWhere;
     const searchQuery = normalizeSearchQuery(rawSearchQuery);
     const searchConditions = searchQuery
       ? storySearchTerms(searchQuery).map((term) => {
@@ -338,6 +365,93 @@ export const getStoryFeed = cache(
     };
   },
 );
+
+export function getCuratedTopic(slug: string): CuratedTopic | undefined {
+  return findCuratedTopic(slug);
+}
+
+export const getTopicIndex = cache(async (): Promise<TopicIndexItem[]> => {
+  const { db } = getDatabaseConnection();
+  const primaryItems = alias(items, "topic_primary_items");
+  const curatedSlugs = CURATED_TOPICS.map((topic) => topic.slug);
+  const recentSince = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const publicTopicStories = and(
+    inArray(stories.status, publicStoryStatuses),
+    ne(primaryItems.contentType, "release"),
+    inArray(topics.slug, curatedSlugs),
+  );
+
+  const [countRows, storyRows] = await Promise.all([
+    db
+      .select({
+        slug: topics.slug,
+        total: count(),
+        recentCount: sql<number>`count(*) filter (where ${stories.lastPublishedAt} >= ${recentSince})`,
+      })
+      .from(storyTopics)
+      .innerJoin(topics, eq(storyTopics.topicId, topics.id))
+      .innerJoin(stories, eq(storyTopics.storyId, stories.id))
+      .leftJoin(primaryItems, eq(stories.primaryItemId, primaryItems.id))
+      .where(publicTopicStories)
+      .groupBy(topics.slug),
+    db
+      .select({
+        topicSlug: topics.slug,
+        id: stories.id,
+        slug: stories.slug,
+        status: stories.status,
+        title: stories.title,
+        factualSummary: stories.factualSummary,
+        firstPublishedAt: stories.firstPublishedAt,
+        lastPublishedAt: stories.lastPublishedAt,
+        independentSourceCount: stories.independentSourceCount,
+        relevanceScore: stories.relevanceScore,
+        overallScore: stories.overallScore,
+        confidence: stories.confidence,
+        primaryItemId: stories.primaryItemId,
+        excerpt: primaryItems.excerpt,
+        originalUrl: primaryItems.originalUrl,
+        contentType: primaryItems.contentType,
+        sourceName: sources.name,
+        sourceSlug: sources.slug,
+      })
+      .from(storyTopics)
+      .innerJoin(topics, eq(storyTopics.topicId, topics.id))
+      .innerJoin(stories, eq(storyTopics.storyId, stories.id))
+      .leftJoin(primaryItems, eq(stories.primaryItemId, primaryItems.id))
+      .leftJoin(sources, eq(primaryItems.sourceId, sources.id))
+      .where(publicTopicStories)
+      .orderBy(topics.slug, desc(stories.lastPublishedAt)),
+  ]);
+
+  const latestRows = new Map<CuratedTopicSlug, (typeof storyRows)[number]>();
+  for (const row of storyRows) {
+    const topic = findCuratedTopic(row.topicSlug);
+    if (topic && !latestRows.has(topic.slug)) latestRows.set(topic.slug, row);
+  }
+  const latestEntries = [...latestRows.entries()];
+  const hydratedLatest = await hydrateFeedRows(
+    latestEntries.map(([, { topicSlug: _topicSlug, ...row }]) => row),
+  );
+  const latestBySlug = new Map<CuratedTopicSlug, StoryFeedItem>();
+  latestEntries.forEach(([slug], index) => {
+    const story = hydratedLatest[index];
+    if (story) latestBySlug.set(slug, story);
+  });
+  const countsBySlug = new Map(
+    countRows.map((row) => [
+      row.slug,
+      { total: Number(row.total), recentCount: Number(row.recentCount) },
+    ]),
+  );
+
+  return CURATED_TOPICS.map((topic) => ({
+    ...topic,
+    total: countsBySlug.get(topic.slug)?.total ?? 0,
+    recentCount: countsBySlug.get(topic.slug)?.recentCount ?? 0,
+    latestStory: latestBySlug.get(topic.slug) ?? null,
+  }));
+});
 
 const dailyContentTypes: ContentType[] = ["news", "paper", "product", "model"];
 

@@ -3,6 +3,7 @@ import { timingSafeEqual } from "node:crypto";
 import {
   createConfiguredStoryAnalyzer,
   runStoryAnalysis,
+  runTopicClassification,
   type StoryAnalysisContentType,
 } from "@ai-news-navigator/jobs";
 import type { IngestionLogger } from "@ai-news-navigator/pipeline";
@@ -76,7 +77,8 @@ export async function GET(request: Request) {
       concurrency: 5,
       ...(contentType ? { contentType } : {}),
     });
-    return NextResponse.json({ analysis });
+    const topics = await runTopicClassification({ db, logger });
+    return NextResponse.json({ analysis, topics });
   } catch (error) {
     logger.error("Scheduled Story analysis failed", {
       error: error instanceof Error ? error.message : String(error),

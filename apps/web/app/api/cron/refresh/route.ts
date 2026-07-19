@@ -6,6 +6,7 @@ import {
   runScheduledReportGeneration,
   runStoryAnalysis,
   runStoryProcessing,
+  runTopicClassification,
 } from "@ai-news-navigator/jobs";
 import type { IngestionLogger } from "@ai-news-navigator/pipeline";
 import { NextResponse } from "next/server";
@@ -56,8 +57,15 @@ export async function GET(request: Request) {
           }),
         })
       : { skipped: true };
+    const topics = await runTopicClassification({ db, logger });
     const reports = await runScheduledReportGeneration({ db, logger });
-    return NextResponse.json({ ingestion, processing, analysis, reports });
+    return NextResponse.json({
+      ingestion,
+      processing,
+      topics,
+      analysis,
+      reports,
+    });
   } catch (error) {
     logger.error("Scheduled refresh failed", {
       error: error instanceof Error ? error.message : String(error),
