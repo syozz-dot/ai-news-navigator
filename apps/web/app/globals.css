@@ -2172,6 +2172,13 @@ button {
   gap: var(--space-5);
 }
 
+.storyHeroActions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex: 0 0 auto;
+}
+
 .favoriteButton {
   min-width: 96px;
   min-height: 44px;
@@ -2208,6 +2215,10 @@ button {
   border-color: var(--accent);
   background: var(--accent);
   color: var(--accent-ink);
+}
+
+.markdownExportButton {
+  min-width: 108px;
 }
 
 .favoritesPage {
@@ -2432,6 +2443,10 @@ button {
     min-width: 44px;
     width: 44px;
     padding: 0;
+  }
+
+  .markdownExportButton {
+    min-width: 44px;
   }
 
   .favoriteButton span {

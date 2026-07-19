@@ -8,6 +8,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { FavoriteButton } from "../../../components/favorite-button";
+import { MarkdownExportButton } from "../../../components/markdown-export-button";
 import {
   contentTypeLabels,
   formatFullDateTime,
@@ -68,21 +69,61 @@ export default async function StoryPage({
               <span>{story.sourceName ?? "未知信源"}</span>
               <span>{formatFullDateTime(story.lastPublishedAt)}</span>
             </div>
-            <FavoriteButton
-              story={{
-                slug: story.slug,
-                title: displayTitle,
-                originalTitle:
-                  displayTitle === story.title ? null : story.title,
-                summary: story.analysis?.whyItMatters ?? factualSummary,
-                contentType: story.contentType
-                  ? contentTypeLabels[story.contentType]
-                  : "情报",
-                sourceName: story.sourceName ?? "未知信源",
-                publishedAt: story.lastPublishedAt?.toISOString() ?? null,
-                score,
-              }}
-            />
+            <div className="storyHeroActions">
+              <MarkdownExportButton
+                story={{
+                  slug: story.slug,
+                  title: displayTitle,
+                  originalTitle: story.analysis?.translatedTitle
+                    ? story.title
+                    : null,
+                  contentType: story.contentType
+                    ? contentTypeLabels[story.contentType]
+                    : "情报",
+                  sourceName: story.sourceName ?? "未知信源",
+                  publishedAt: formatFullDateTime(story.lastPublishedAt),
+                  relevanceScore: formatScore(score),
+                  sourceCount: story.independentSourceCount,
+                  status: storyStatusLabels[story.status],
+                  factualSummary,
+                  whyItMatters: story.analysis?.whyItMatters ?? null,
+                  underlyingLogic: story.analysis?.underlyingLogic ?? null,
+                  productImpact: story.analysis?.productImpact ?? null,
+                  productOpportunities:
+                    story.analysis?.productOpportunities ?? [],
+                  openQuestions: story.analysis?.openQuestions ?? [],
+                  matchedSignals: story.matchedSignals.map(signalLabel),
+                  analysisProvider: story.analysis?.provider ?? null,
+                  analysisModel: story.analysis?.model ?? null,
+                  evidence: story.evidence.map((item) => ({
+                    sourceName: item.sourceName,
+                    title: item.title,
+                    url: item.originalUrl,
+                    publishedAt: formatFullDateTime(
+                      item.sourcePublishedAt ?? item.discoveredAt,
+                    ),
+                    contentType: contentTypeLabels[item.contentType],
+                    relevanceScore: formatScore(item.relevanceScore),
+                    excerpt: item.excerpt,
+                  })),
+                }}
+              />
+              <FavoriteButton
+                story={{
+                  slug: story.slug,
+                  title: displayTitle,
+                  originalTitle:
+                    displayTitle === story.title ? null : story.title,
+                  summary: story.analysis?.whyItMatters ?? factualSummary,
+                  contentType: story.contentType
+                    ? contentTypeLabels[story.contentType]
+                    : "情报",
+                  sourceName: story.sourceName ?? "未知信源",
+                  publishedAt: story.lastPublishedAt?.toISOString() ?? null,
+                  score,
+                }}
+              />
+            </div>
           </div>
           <h1 lang={story.analysis?.translatedTitle ? undefined : "en"}>
             {displayTitle}
