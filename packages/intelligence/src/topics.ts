@@ -124,6 +124,8 @@ const TOPIC_RULES: readonly TopicRule[] = [
       "model context protocol",
       "mcp",
       "智能体",
+      "ai代理",
+      "llm代理",
       "代理系统",
       "工具调用",
     ],
@@ -348,11 +350,7 @@ export function classifyStoryTopics(
     const signalMatches = (rule.signals ?? []).filter((signal) =>
       signals.has(signal),
     );
-    if (
-      titleMatches.length === 0 &&
-      bodyMatches.length === 0 &&
-      signalMatches.length === 0
-    ) {
+    if (titleMatches.length === 0 && bodyMatches.length === 0) {
       return [];
     }
 

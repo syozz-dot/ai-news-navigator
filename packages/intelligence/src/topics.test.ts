@@ -56,4 +56,20 @@ describe("curated Story topics", () => {
     expect(matches.map((match) => match.slug)).toContain("multimodal");
     expect(matches.map((match) => match.slug)).not.toContain("ai-video");
   });
+
+  it("uses broad assessment signals only as supporting evidence", () => {
+    const matches = classifyStoryTopics({
+      title: "ThinkingCap reduces reasoning tokens on benchmark suites",
+      factualSummary:
+        "The fine-tuned language model preserves accuracy while lowering inference cost.",
+      matchedSignals: ["ai:agents", "ai:multimodal", "product:safety-policy"],
+    });
+
+    expect(matches.map((match) => match.slug)).toContain("llm-reasoning");
+    expect(matches.map((match) => match.slug)).not.toContain("agent");
+    expect(matches.map((match) => match.slug)).not.toContain("multimodal");
+    expect(matches.map((match) => match.slug)).not.toContain(
+      "safety-alignment",
+    );
+  });
 });
