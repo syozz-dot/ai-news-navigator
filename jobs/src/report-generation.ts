@@ -374,10 +374,31 @@ export async function generateReportSnapshot(input: {
     };
   }
 
-  let editorial: EditorialOutput | null = null;
-  if (input.type !== "daily" && input.useModel !== false) {
+  const [existing] = await input.db
+    .select({
+      content: reports.content,
+      provider: reports.provider,
+      model: reports.model,
+      promptVersion: reports.promptVersion,
+    })
+    .from(reports)
+    .where(
+      and(eq(reports.type, period.type), eq(reports.periodKey, period.key)),
+    )
+    .limit(1);
+
+  let generatedEditorial: EditorialOutput | null = null;
+  if (
+    input.type !== "daily" &&
+    input.useModel !== false &&
+    !existing?.provider
+  ) {
     try {
-      editorial = await generateEditorial(input.type, period.key, sections);
+      generatedEditorial = await generateEditorial(
+        input.type,
+        period.key,
+        sections,
+      );
     } catch (error) {
       input.logger.warn(
         "Report editorial generation failed; saving deterministic snapshot",
@@ -389,15 +410,21 @@ export async function generateReportSnapshot(input: {
       );
     }
   }
-  if (editorial) {
+  const introduction =
+    generatedEditorial?.introduction || existing?.content.introduction || null;
+  if (generatedEditorial || existing) {
     for (const section of sections) {
       section.editorialSummary =
-        editorial.sectionSummaries[section.type] ?? null;
+        generatedEditorial?.sectionSummaries[section.type] ??
+        existing?.content.sections.find(
+          (existingSection) => existingSection.type === section.type,
+        )?.editorialSummary ??
+        null;
     }
   }
 
   const content: ReportSnapshotContent = {
-    introduction: editorial?.introduction || null,
+    introduction,
     highlights: sections
       .flatMap((section) => section.stories)
       .slice(0, 5)
@@ -415,9 +442,11 @@ export async function generateReportSnapshot(input: {
       content,
       storyCount,
       readingMinutes: estimateMinutes(sections),
-      provider: editorial ? "deepseek" : null,
-      model: editorial ? REPORT_MODEL : null,
-      promptVersion: editorial ? REPORT_PROMPT_VERSION : null,
+      provider: generatedEditorial ? "deepseek" : (existing?.provider ?? null),
+      model: generatedEditorial ? REPORT_MODEL : (existing?.model ?? null),
+      promptVersion: generatedEditorial
+        ? REPORT_PROMPT_VERSION
+        : (existing?.promptVersion ?? null),
       generatedAt: new Date(),
       updatedAt: new Date(),
     })
@@ -427,9 +456,13 @@ export async function generateReportSnapshot(input: {
         content,
         storyCount,
         readingMinutes: estimateMinutes(sections),
-        provider: editorial ? "deepseek" : null,
-        model: editorial ? REPORT_MODEL : null,
-        promptVersion: editorial ? REPORT_PROMPT_VERSION : null,
+        provider: generatedEditorial
+          ? "deepseek"
+          : (existing?.provider ?? null),
+        model: generatedEditorial ? REPORT_MODEL : (existing?.model ?? null),
+        promptVersion: generatedEditorial
+          ? REPORT_PROMPT_VERSION
+          : (existing?.promptVersion ?? null),
         generatedAt: new Date(),
         updatedAt: new Date(),
       },
@@ -438,14 +471,14 @@ export async function generateReportSnapshot(input: {
     type: period.type,
     periodKey: period.key,
     storyCount,
-    usedModel: editorial !== null,
+    usedModel: generatedEditorial !== null,
   });
   return {
     type: period.type,
     periodKey: period.key,
     storyCount,
     generated: true,
-    usedModel: editorial !== null,
+    usedModel: generatedEditorial !== null,
   };
 }
 
@@ -465,6 +498,17 @@ export async function runScheduledReportGeneration(input: {
       useModel: false,
     }),
   ];
+  for (const type of ["weekly", "monthly"] as const) {
+    const period = currentPeriod(type, now);
+    results.push(
+      await generateReportSnapshot({
+        db: input.db,
+        logger: input.logger,
+        type,
+        periodKey: period.key,
+      }),
+    );
+  }
   const utcCalendar = new Date(`${today}T00:00:00Z`);
   if (utcCalendar.getUTCDay() === 1) {
     const period = previousClosedPeriod("weekly", now);
