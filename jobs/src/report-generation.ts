@@ -498,6 +498,34 @@ export async function runScheduledReportGeneration(input: {
       useModel: false,
     }),
   ];
+  const dailyDateExpression = sql<string>`to_char(timezone('Asia/Shanghai', ${stories.createdAt}), 'YYYY-MM-DD')`;
+  const [historicalDates, existingDailyReports] = await Promise.all([
+    input.db
+      .selectDistinct({ periodKey: dailyDateExpression })
+      .from(stories)
+      .where(gte(stories.createdAt, new Date(now.getTime() - 30 * 86_400_000)))
+      .orderBy(desc(dailyDateExpression))
+      .limit(14),
+    input.db
+      .select({ periodKey: reports.periodKey })
+      .from(reports)
+      .where(eq(reports.type, "daily")),
+  ]);
+  const existingDailyKeys = new Set(
+    existingDailyReports.map((report) => report.periodKey),
+  );
+  for (const { periodKey } of historicalDates) {
+    if (periodKey === today || existingDailyKeys.has(periodKey)) continue;
+    results.push(
+      await generateReportSnapshot({
+        db: input.db,
+        logger: input.logger,
+        type: "daily",
+        periodKey,
+        useModel: false,
+      }),
+    );
+  }
   for (const type of ["weekly", "monthly"] as const) {
     const period = currentPeriod(type, now);
     results.push(
