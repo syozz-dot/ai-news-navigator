@@ -44,7 +44,7 @@ export default async function Home({
     getStoryFeed(activeType),
     getDailyIssue(),
   ]);
-  const focusStory = items[0];
+  const focusStory = dailyIssue.items[0];
   const focusSummary =
     focusStory?.factualSummary ??
     (focusStory
@@ -56,20 +56,17 @@ export default async function Home({
     <main>
       <section className="dailyBrief" aria-labelledby="brief-title">
         <div className="briefLead">
-          <div className="introDate">{formatCalendarDate()}</div>
-          <h1 id="brief-title">今日 AI 简报</h1>
-          <div className="briefMonogram" aria-hidden="true">
-            <span />N<span />
+          <div className="introDate">
+            {formatCalendarDate(dailyIssue.issueDate)}
           </div>
-          <p>先看今天发生了什么，再理解它对产品和业务的影响。</p>
-          <aside
-            className="briefOverview"
-            aria-labelledby="brief-overview-title"
-          >
+          <div className="briefOverview" aria-labelledby="brief-title">
             <div className="briefOverviewHeader">
-              <h2 id="brief-overview-title">今日概览</h2>
+              <h1 id="brief-title">本期概览</h1>
               <strong>{dailyIssue.total}</strong>
             </div>
+            <p className="briefOverviewMeta">
+              约 {dailyIssue.readingMinutes} 分钟读完
+            </p>
             <dl>
               <div>
                 <dt>新闻</dt>
@@ -89,23 +86,25 @@ export default async function Home({
               </div>
             </dl>
             <Link href={`/daily?date=${dailyIssue.issueDate}`}>
-              阅读今日日报
+              阅读本期日报
               <ArrowRight aria-hidden="true" size={15} />
             </Link>
-          </aside>
+          </div>
         </div>
 
         {focusStory ? (
-          <Link className="focusPanel" href={`/stories/${focusStory.slug}`}>
+          <article className="focusPanel">
             <div className="focusContent">
               <h2>今日焦点</h2>
-              <h3
-                className="focusTitle"
-                lang={focusStory.translatedTitle ? undefined : "en"}
-              >
-                {focusTitle}
+              <h3 className="focusTitle">
+                <Link
+                  className="focusTitleLink"
+                  href={`/stories/${focusStory.slug}`}
+                  lang={focusStory.translatedTitle ? undefined : "en"}
+                >
+                  {focusTitle}
+                </Link>
               </h3>
-              <p className="focusSummary">{focusSummary}</p>
               {focusStory.hasAnalysis ? (
                 <dl className="focusNotes">
                   <div>
@@ -119,10 +118,12 @@ export default async function Home({
                     </div>
                   ) : null}
                 </dl>
-              ) : null}
+              ) : (
+                <p className="focusSummary">{focusSummary}</p>
+              )}
             </div>
             <div className="focusScore">
-              <span>相关度</span>
+              <span>产品相关度</span>
               <strong>
                 {Math.round(
                   (focusStory.overallScore ?? focusStory.relevanceScore ?? 0) *
@@ -136,11 +137,14 @@ export default async function Home({
                   : "情报"}
               </small>
               <small>来源：{focusStory.sourceName ?? "未知信源"}</small>
-              <span className="focusLinkHint">
-                阅读 Story <ArrowRight aria-hidden="true" size={15} />
-              </span>
+              <Link
+                className="focusLinkHint"
+                href={`/stories/${focusStory.slug}`}
+              >
+                阅读全文 <ArrowRight aria-hidden="true" size={15} />
+              </Link>
             </div>
-          </Link>
+          </article>
         ) : (
           <div className="focusPanel focusPanelEmpty">
             <div className="focusContent">
@@ -199,12 +203,7 @@ export default async function Home({
           ) : (
             <div className="storyList">
               {items.map((story, index) => (
-                <StoryRow
-                  story={story}
-                  index={index}
-                  key={story.id}
-                  lead={index === 0}
-                />
+                <StoryRow story={story} index={index} key={story.id} />
               ))}
             </div>
           )}

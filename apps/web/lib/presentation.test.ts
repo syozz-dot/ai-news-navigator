@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { selectFeedInterpretation, signalLabel } from "./presentation.js";
+import {
+  formatCalendarDate,
+  selectFeedInterpretation,
+  signalLabel,
+} from "./presentation.js";
 
 describe("Chinese rule presentation", () => {
   it("translates current deterministic signal identifiers", () => {
@@ -28,5 +32,9 @@ describe("Chinese rule presentation", () => {
         whyItMatters: null,
       }),
     ).toBe("A real product description");
+  });
+
+  it("formats an issue date in the Shanghai calendar without timezone drift", () => {
+    expect(formatCalendarDate("2026-07-19")).toContain("2026年7月19日");
   });
 });

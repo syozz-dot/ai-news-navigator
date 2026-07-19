@@ -14,18 +14,16 @@ import {
 export function StoryRow({
   story,
   index,
-  lead = false,
 }: {
   story: StoryFeedItem;
   index: number;
-  lead?: boolean;
 }) {
   const score = story.overallScore ?? story.relevanceScore;
   const interpretation = selectFeedInterpretation(story);
   const displayTitle = story.translatedTitle ?? story.title;
 
   return (
-    <article className={lead ? "storyRow lead" : "storyRow"}>
+    <article className="storyRow">
       <div className="storyIndex" aria-hidden="true">
         {String(index + 1).padStart(2, "0")}
       </div>

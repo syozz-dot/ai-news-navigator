@@ -103,11 +103,14 @@ export function formatFullDateTime(value: Date | null) {
   }).format(value);
 }
 
-export function formatCalendarDate(value = new Date()) {
+export function formatCalendarDate(value: Date | string = new Date()) {
+  const date =
+    typeof value === "string" ? new Date(`${value}T00:00:00+08:00`) : value;
   return new Intl.DateTimeFormat("zh-CN", {
+    timeZone: "Asia/Shanghai",
     year: "numeric",
     month: "long",
     day: "numeric",
     weekday: "long",
-  }).format(value);
+  }).format(date);
 }
