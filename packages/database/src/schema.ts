@@ -91,6 +91,37 @@ export const topicTypeEnum = pgEnum("topic_type", [
   "other",
 ]);
 
+export const reportTypeEnum = pgEnum("report_type", [
+  "daily",
+  "weekly",
+  "monthly",
+]);
+
+export interface ReportSnapshotStory {
+  id: string;
+  slug: string;
+  title: string;
+  summary: string;
+  whyItMatters: string | null;
+  sourceName: string;
+  contentType: "news" | "paper" | "product" | "model";
+  score: number;
+  publishedAt: string | null;
+}
+
+export interface ReportSnapshotSection {
+  type: ReportSnapshotStory["contentType"];
+  label: string;
+  editorialSummary: string | null;
+  stories: ReportSnapshotStory[];
+}
+
+export interface ReportSnapshotContent {
+  introduction: string | null;
+  highlights: string[];
+  sections: ReportSnapshotSection[];
+}
+
 export const sources = pgTable(
   "sources",
   {
@@ -439,6 +470,37 @@ export const storyAnalyses = pgTable(
   ],
 );
 
+export const reports = pgTable(
+  "reports",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    type: reportTypeEnum("type").notNull(),
+    periodKey: varchar("period_key", { length: 32 }).notNull(),
+    periodStart: timestamp("period_start", { withTimezone: true }).notNull(),
+    periodEnd: timestamp("period_end", { withTimezone: true }).notNull(),
+    title: text("title").notNull(),
+    content: jsonb("content").$type<ReportSnapshotContent>().notNull(),
+    storyCount: integer("story_count").default(0).notNull(),
+    readingMinutes: integer("reading_minutes").default(1).notNull(),
+    provider: varchar("provider", { length: 64 }),
+    model: varchar("model", { length: 128 }),
+    promptVersion: varchar("prompt_version", { length: 64 }),
+    generatedAt: timestamp("generated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex("reports_type_period_unique").on(table.type, table.periodKey),
+    index("reports_type_period_start_idx").on(table.type, table.periodStart),
+  ],
+);
+
 export type Source = typeof sources.$inferSelect;
 export type NewSource = typeof sources.$inferInsert;
 export type SourceRun = typeof sourceRuns.$inferSelect;
@@ -453,3 +515,5 @@ export type Story = typeof stories.$inferSelect;
 export type NewStory = typeof stories.$inferInsert;
 export type Topic = typeof topics.$inferSelect;
 export type NewTopic = typeof topics.$inferInsert;
+export type Report = typeof reports.$inferSelect;
+export type NewReport = typeof reports.$inferInsert;

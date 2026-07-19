@@ -1,219 +1,291 @@
 import { ArrowLeft, ArrowRight } from "@phosphor-icons/react/dist/ssr";
+import type { ReportSnapshotStory } from "@ai-news-navigator/database";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { contentTypeLabels, formatScore } from "../../lib/presentation";
+import { contentTypeLabels } from "../../lib/presentation";
 import {
-  getDailyIssue,
-  type ContentType,
-  type DailyIssue,
-  type StoryFeedItem,
+  getReportArchive,
+  getReportIssue,
+  type ReportIssue,
+  type ReportType,
 } from "../../lib/queries";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "AI 日报",
-  description:
-    "把当天最值得关注的 AI 新闻、论文、产品和模型浓缩成一份中文日报。",
+  title: "AI 情报简报",
+  description: "按日、周、月阅读最值得关注的 AI 新闻、论文、产品和模型。",
 };
 
-const dailySections: Array<{
-  type: Extract<ContentType, "news" | "paper" | "product" | "model">;
+const reportTypes: Array<{
+  type: ReportType;
   label: string;
-  englishLabel: string;
+  archiveLabel: string;
 }> = [
-  { type: "model", label: "模型进展", englishLabel: "MODEL RADAR" },
-  { type: "product", label: "产品与商业", englishLabel: "PRODUCT" },
-  { type: "news", label: "行业动态", englishLabel: "INDUSTRY" },
-  { type: "paper", label: "论文研究", englishLabel: "RESEARCH" },
+  { type: "daily", label: "日报", archiveLabel: "往期日报" },
+  { type: "weekly", label: "周报", archiveLabel: "往期周报" },
+  { type: "monthly", label: "月报", archiveLabel: "往期月报" },
 ];
 
-function formatIssueDate(value: string): string {
-  const date = new Date(`${value}T00:00:00Z`);
-  return new Intl.DateTimeFormat("zh-CN", {
-    timeZone: "UTC",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    weekday: "long",
-  }).format(date);
+const englishLabels = {
+  model: "MODEL RADAR",
+  product: "PRODUCT",
+  news: "INDUSTRY",
+  paper: "RESEARCH",
+} as const;
+
+function isReportType(value?: string): value is ReportType {
+  return value === "daily" || value === "weekly" || value === "monthly";
 }
 
-function itemsForSection(
-  issue: DailyIssue,
-  type: ContentType,
-): StoryFeedItem[] {
-  return issue.items.filter((item) => item.contentType === type);
+function formatPeriodLabel(type: ReportType, key: string): string {
+  if (type === "daily") {
+    return new Intl.DateTimeFormat("zh-CN", {
+      timeZone: "UTC",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      weekday: "long",
+    }).format(new Date(`${key}T00:00:00Z`));
+  }
+  if (type === "monthly") {
+    const [year, month] = key.split("-");
+    return `${year} 年 ${Number(month)} 月`;
+  }
+  return key.replace("-W", " 年第 ") + " 周";
+}
+
+function compactPeriodLabel(type: ReportType, key: string): string {
+  if (type === "daily")
+    return `${Number(key.slice(5, 7))}月${Number(key.slice(8, 10))}日`;
+  if (type === "monthly") return `${Number(key.slice(5, 7))}月`;
+  return `第 ${Number(key.slice(-2))} 周`;
+}
+
+function reportHref(type: ReportType, period?: string): string {
+  const params = new URLSearchParams({ type });
+  if (period) params.set("period", period);
+  return `/daily?${params.toString()}`;
+}
+
+function allStories(issue: ReportIssue): ReportSnapshotStory[] {
+  return issue.content.sections.flatMap((section) => section.stories);
 }
 
 export default async function DailyPage({
   searchParams,
 }: {
-  searchParams: Promise<{ date?: string }>;
+  searchParams: Promise<{ type?: string; period?: string }>;
 }) {
-  if (!process.env.DATABASE_URL) return <DailyUnavailable />;
+  if (!process.env.DATABASE_URL) return <ReportUnavailable />;
 
-  const { date } = await searchParams;
-  const issue = await getDailyIssue(date);
-  const highlights = issue.items.slice(0, 5);
+  const params = await searchParams;
+  const type = isReportType(params.type) ? params.type : "daily";
+  const [archive, issue] = await Promise.all([
+    getReportArchive(),
+    getReportIssue(type, params.period),
+  ]);
+  const typeArchive = archive.filter((item) => item.type === type);
+  const activeDefinition = reportTypes.find((item) => item.type === type)!;
 
   return (
     <main className="dailyPage">
-      <div className="dailyIssueShell">
-        <header className="dailyIssueHeader">
-          <div className="dailyIssueEyebrow">
+      <div className="reportLayout">
+        <aside className="reportArchive" aria-label="简报归档">
+          <div className="reportArchiveHeader">
             <span>AI NEWS NAVIGATOR</span>
-            <span>DAILY · {issue.issueDate.replaceAll("-", ".")}</span>
+            <strong>情报简报</strong>
           </div>
-          <div className="dailyIssueTitleRow">
-            <div>
-              <p>{formatIssueDate(issue.issueDate)}</p>
-              <h1>AI 日报</h1>
-            </div>
-            <dl className="dailyIssueSummary">
-              <div>
-                <dt>今日重点</dt>
-                <dd>{issue.total}</dd>
-              </div>
-              <div>
-                <dt>预计阅读</dt>
-                <dd>{issue.readingMinutes} 分钟</dd>
-              </div>
-            </dl>
+          <nav className="reportTypeTabs" aria-label="简报类型">
+            {reportTypes.map((item) => (
+              <Link
+                aria-current={item.type === type ? "page" : undefined}
+                href={reportHref(item.type)}
+                key={item.type}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+          <div className="reportArchiveList">
+            <p>{activeDefinition.archiveLabel}</p>
+            {typeArchive.length > 0 ? (
+              typeArchive.map((item) => (
+                <Link
+                  aria-current={
+                    item.periodKey === issue?.periodKey ? "page" : undefined
+                  }
+                  href={reportHref(type, item.periodKey)}
+                  key={`${item.type}-${item.periodKey}`}
+                >
+                  <span>{compactPeriodLabel(type, item.periodKey)}</span>
+                  <strong>{item.storyCount} 条</strong>
+                </Link>
+              ))
+            ) : (
+              <span className="reportArchiveEmpty">首期生成后会保存在这里</span>
+            )}
           </div>
-        </header>
+          <Link className="reportBackLink" href="/">
+            <ArrowLeft aria-hidden="true" size={14} />
+            返回情报流
+          </Link>
+        </aside>
 
-        {issue.total > 0 ? (
-          <>
-            <nav className="dailyContents" aria-label="本期目录">
-              <span>本期目录</span>
-              {dailySections
-                .filter((section) => issue.counts[section.type] > 0)
-                .map((section, index) => (
-                  <a key={section.type} href={`#daily-${section.type}`}>
-                    <span>{String(index + 1).padStart(2, "0")}</span>
-                    {section.label}
-                    <small>{issue.counts[section.type]}</small>
-                  </a>
-                ))}
-            </nav>
-
-            <section
-              className="dailyHighlights"
-              aria-labelledby="highlights-title"
-            >
-              <div className="dailySectionHeading">
-                <span>00</span>
-                <div>
-                  <p>TODAY&apos;S HIGHLIGHTS</p>
-                  <h2 id="highlights-title">今日看点</h2>
-                </div>
-              </div>
-              <ol>
-                {highlights.map((story, index) => (
-                  <li key={story.id}>
-                    <span>{String(index + 1).padStart(2, "0")}</span>
-                    <Link href={`/stories/${story.slug}`}>
-                      {story.translatedTitle ?? story.title}
-                    </Link>
-                    <small>
-                      {story.contentType
-                        ? contentTypeLabels[story.contentType]
-                        : "情报"}
-                    </small>
-                  </li>
-                ))}
-              </ol>
-            </section>
-
-            <div className="dailySections">
-              {dailySections.map((section, sectionIndex) => {
-                const sectionItems = itemsForSection(issue, section.type);
-                if (sectionItems.length === 0) return null;
-                return (
-                  <section
-                    className="dailySection"
-                    id={`daily-${section.type}`}
-                    key={section.type}
-                  >
-                    <div className="dailySectionHeading">
-                      <span>{String(sectionIndex + 1).padStart(2, "0")}</span>
-                      <div>
-                        <p>{section.englishLabel}</p>
-                        <h2>{section.label}</h2>
-                      </div>
-                      <strong>{sectionItems.length} 条</strong>
-                    </div>
-                    <div className="dailyStoryList">
-                      {sectionItems.map((story) => (
-                        <article className="dailyStory" key={story.id}>
-                          <div className="dailyStoryMeta">
-                            <span>{story.sourceName ?? "未知信源"}</span>
-                            <span>
-                              {formatScore(
-                                story.overallScore ?? story.relevanceScore,
-                              )}
-                            </span>
-                          </div>
-                          <h3>
-                            <Link href={`/stories/${story.slug}`}>
-                              {story.translatedTitle ?? story.title}
-                            </Link>
-                          </h3>
-                          <p>{story.factualSummary}</p>
-                          {story.whyItMatters ? (
-                            <div className="dailyWhy">
-                              <strong>为什么值得看</strong>
-                              <span>{story.whyItMatters}</span>
-                            </div>
-                          ) : null}
-                        </article>
-                      ))}
-                    </div>
-                  </section>
-                );
-              })}
-            </div>
-          </>
-        ) : (
-          <section className="dailyEmpty">
-            <p>本期日报正在整理</p>
-            <h2>中文解读生成后会自动汇入这里。</h2>
-            <Link href="/">先返回情报流</Link>
-          </section>
-        )}
-
-        <nav className="dailyDateNav" aria-label="日报日期导航">
-          {issue.previousDate ? (
-            <Link href={`/daily?date=${issue.previousDate}`}>
-              <ArrowLeft aria-hidden="true" size={16} />
-              前一日
-            </Link>
-          ) : (
-            <span />
-          )}
-          <Link href="/">返回情报流</Link>
-          {issue.nextDate ? (
-            <Link href={`/daily?date=${issue.nextDate}`}>
-              后一日
-              <ArrowRight aria-hidden="true" size={16} />
-            </Link>
-          ) : (
-            <span />
-          )}
-        </nav>
+        {issue ? <ReportArticle issue={issue} /> : <EmptyReport type={type} />}
       </div>
     </main>
   );
 }
 
-function DailyUnavailable() {
+function ReportArticle({ issue }: { issue: ReportIssue }) {
+  const stories = allStories(issue);
+  const highlightIds = new Set(issue.content.highlights);
+  const highlights = stories
+    .filter((story) => highlightIds.has(story.id))
+    .slice(0, 5);
+
+  return (
+    <article className="dailyIssueShell">
+      <header className="dailyIssueHeader">
+        <div className="dailyIssueEyebrow">
+          <span>AI NEWS NAVIGATOR</span>
+          <span>
+            {issue.type.toUpperCase()} · {issue.periodKey.replaceAll("-", ".")}
+          </span>
+        </div>
+        <div className="dailyIssueTitleRow">
+          <div>
+            <p>{formatPeriodLabel(issue.type, issue.periodKey)}</p>
+            <h1>{issue.title}</h1>
+          </div>
+          <dl className="dailyIssueSummary">
+            <div>
+              <dt>本期重点</dt>
+              <dd>{issue.storyCount}</dd>
+            </div>
+            <div>
+              <dt>预计阅读</dt>
+              <dd>{issue.readingMinutes} 分钟</dd>
+            </div>
+          </dl>
+        </div>
+        {issue.content.introduction ? (
+          <p className="reportIntroduction">{issue.content.introduction}</p>
+        ) : null}
+      </header>
+
+      <nav className="dailyContents" aria-label="本期目录">
+        <span>本期目录</span>
+        {issue.content.sections.map((section, index) => (
+          <a key={section.type} href={`#report-${section.type}`}>
+            <span>{String(index + 1).padStart(2, "0")}</span>
+            {section.label}
+            <small>{section.stories.length}</small>
+          </a>
+        ))}
+      </nav>
+
+      <section className="dailyHighlights" aria-labelledby="highlights-title">
+        <div className="dailySectionHeading">
+          <span>00</span>
+          <div>
+            <p>PERIOD HIGHLIGHTS</p>
+            <h2 id="highlights-title">本期看点</h2>
+          </div>
+        </div>
+        <ol>
+          {highlights.map((story, index) => (
+            <li key={story.id}>
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <Link href={`/stories/${story.slug}`}>{story.title}</Link>
+              <small>{contentTypeLabels[story.contentType]}</small>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <div className="dailySections">
+        {issue.content.sections.map((section, sectionIndex) => (
+          <section
+            className="dailySection"
+            id={`report-${section.type}`}
+            key={section.type}
+          >
+            <div className="dailySectionHeading">
+              <span>{String(sectionIndex + 1).padStart(2, "0")}</span>
+              <div>
+                <p>{englishLabels[section.type]}</p>
+                <h2>{section.label}</h2>
+              </div>
+              <strong>{section.stories.length} 条</strong>
+            </div>
+            {section.editorialSummary ? (
+              <p className="reportSectionSummary">{section.editorialSummary}</p>
+            ) : null}
+            <div className="dailyStoryList">
+              {section.stories.map((story) => (
+                <article className="dailyStory" key={story.id}>
+                  <div className="dailyStoryMeta">
+                    <span>{story.sourceName}</span>
+                    <span>{story.score}</span>
+                  </div>
+                  <h3>
+                    <Link href={`/stories/${story.slug}`}>{story.title}</Link>
+                  </h3>
+                  <p>{story.summary}</p>
+                  {story.whyItMatters ? (
+                    <div className="dailyWhy">
+                      <strong>为什么值得看</strong>
+                      <span>{story.whyItMatters}</span>
+                    </div>
+                  ) : null}
+                </article>
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+
+      <nav className="dailyDateNav" aria-label="简报周期导航">
+        {issue.previousKey ? (
+          <Link href={reportHref(issue.type, issue.previousKey)}>
+            <ArrowLeft aria-hidden="true" size={16} /> 前一期
+          </Link>
+        ) : (
+          <span />
+        )}
+        <Link href="/">返回情报流</Link>
+        {issue.nextKey ? (
+          <Link href={reportHref(issue.type, issue.nextKey)}>
+            后一期 <ArrowRight aria-hidden="true" size={16} />
+          </Link>
+        ) : (
+          <span />
+        )}
+      </nav>
+    </article>
+  );
+}
+
+function EmptyReport({ type }: { type: ReportType }) {
+  const label = reportTypes.find((item) => item.type === type)!.label;
+  return (
+    <section className="dailyIssueShell dailyEmpty standalone">
+      <p>首期{label}正在积累</p>
+      <h1>周期内有足够的中文解读后，会自动生成并保存在归档中。</h1>
+      <Link href="/">返回情报流</Link>
+    </section>
+  );
+}
+
+function ReportUnavailable() {
   return (
     <main className="dailyPage">
       <section className="dailyEmpty standalone">
         <p>需要完成一次本地配置</p>
-        <h1>连接数据库后，日报会自动生成。</h1>
+        <h1>连接数据库后，简报会自动生成。</h1>
         <Link href="/">返回首页</Link>
       </section>
     </main>

@@ -1,12 +1,14 @@
 import {
   itemAssessments,
   items,
+  reports,
   sources,
   stories,
   storyAnalyses,
   storyItems,
   storyTopics,
   topics,
+  type ReportSnapshotContent,
 } from "@ai-news-navigator/database";
 import {
   and,
@@ -73,6 +75,25 @@ export interface DailyIssue {
   readingMinutes: number;
   previousDate: string | null;
   nextDate: string | null;
+}
+
+export type ReportType = typeof reports.$inferSelect.type;
+
+export interface ReportArchiveItem {
+  type: ReportType;
+  periodKey: string;
+  title: string;
+  storyCount: number;
+  generatedAt: Date;
+}
+
+export interface ReportIssue extends ReportArchiveItem {
+  periodStart: Date;
+  periodEnd: Date;
+  readingMinutes: number;
+  content: ReportSnapshotContent;
+  previousKey: string | null;
+  nextKey: string | null;
 }
 
 export interface StoryEvidenceItem {
@@ -391,6 +412,69 @@ export const getDailyIssue = cache(
       readingMinutes: estimateChineseReadingMinutes(dailyItems),
       previousDate,
       nextDate,
+    };
+  },
+);
+
+export const getReportArchive = cache(
+  async (): Promise<ReportArchiveItem[]> => {
+    const { db } = getDatabaseConnection();
+    return db
+      .select({
+        type: reports.type,
+        periodKey: reports.periodKey,
+        title: reports.title,
+        storyCount: reports.storyCount,
+        generatedAt: reports.generatedAt,
+      })
+      .from(reports)
+      .orderBy(desc(reports.periodStart))
+      .limit(120);
+  },
+);
+
+export const getReportIssue = cache(
+  async (
+    type: ReportType = "daily",
+    requestedKey?: string,
+  ): Promise<ReportIssue | null> => {
+    const { db } = getDatabaseConnection();
+    const archive = await db
+      .select({ periodKey: reports.periodKey })
+      .from(reports)
+      .where(eq(reports.type, type))
+      .orderBy(desc(reports.periodStart));
+    const selectedKey = requestedKey ?? archive[0]?.periodKey;
+    if (!selectedKey) return null;
+    const [report] = await db
+      .select({
+        type: reports.type,
+        periodKey: reports.periodKey,
+        periodStart: reports.periodStart,
+        periodEnd: reports.periodEnd,
+        title: reports.title,
+        content: reports.content,
+        storyCount: reports.storyCount,
+        readingMinutes: reports.readingMinutes,
+        generatedAt: reports.generatedAt,
+      })
+      .from(reports)
+      .where(and(eq(reports.type, type), eq(reports.periodKey, selectedKey)))
+      .limit(1);
+    if (!report) return null;
+    const currentIndex = archive.findIndex(
+      (item) => item.periodKey === selectedKey,
+    );
+    return {
+      ...report,
+      previousKey:
+        currentIndex >= 0
+          ? (archive[currentIndex + 1]?.periodKey ?? null)
+          : null,
+      nextKey:
+        currentIndex > 0
+          ? (archive[currentIndex - 1]?.periodKey ?? null)
+          : null,
     };
   },
 );

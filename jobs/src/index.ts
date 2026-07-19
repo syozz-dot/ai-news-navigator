@@ -61,3 +61,11 @@ export {
   type StoryAnalysisResult,
   type StoryAnalyzer,
 } from "./story-analysis.js";
+export {
+  generateReportSnapshot,
+  reportPeriodUtils,
+  runScheduledReportGeneration,
+  REPORT_PROMPT_VERSION,
+  type ReportGenerationResult,
+  type ReportType,
+} from "./report-generation.js";

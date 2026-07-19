@@ -1,11 +1,8 @@
 import { timingSafeEqual } from "node:crypto";
 
 import {
-  createConfiguredStoryAnalyzer,
-  runDueSourceIngestion,
-  runScheduledReportGeneration,
-  runStoryAnalysis,
-  runStoryProcessing,
+  generateReportSnapshot,
+  type ReportType,
 } from "@ai-news-navigator/jobs";
 import type { IngestionLogger } from "@ai-news-navigator/pipeline";
 import { NextResponse } from "next/server";
@@ -41,27 +38,30 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
   }
 
+  const searchParams = new URL(request.url).searchParams;
+  const type = searchParams.get("type") ?? "daily";
+  if (!(["daily", "weekly", "monthly"] as string[]).includes(type)) {
+    return NextResponse.json({ error: "INVALID_REPORT_TYPE" }, { status: 400 });
+  }
+
   try {
-    const searchParams = new URL(request.url).searchParams;
-    const shouldAnalyze = searchParams.get("analyze") !== "0";
     const { db } = getDatabaseConnection();
-    const ingestion = await runDueSourceIngestion({ db, logger });
-    const processing = await runStoryProcessing({ db, logger });
-    const analysis = shouldAnalyze
-      ? await runStoryAnalysis({
-          db,
-          logger,
-          analyzer: createConfiguredStoryAnalyzer({
-            authorizationToken: request.headers.get("x-vercel-oidc-token"),
-          }),
-        })
-      : { skipped: true };
-    const reports = await runScheduledReportGeneration({ db, logger });
-    return NextResponse.json({ ingestion, processing, analysis, reports });
+    const periodKey = searchParams.get("period")?.trim();
+    const result = await generateReportSnapshot({
+      db,
+      logger,
+      type: type as ReportType,
+      useModel: searchParams.get("model") !== "0",
+      ...(periodKey ? { periodKey } : {}),
+    });
+    return NextResponse.json(result);
   } catch (error) {
-    logger.error("Scheduled refresh failed", {
+    logger.error("Report generation failed", {
       error: error instanceof Error ? error.message : String(error),
     });
-    return NextResponse.json({ error: "REFRESH_FAILED" }, { status: 500 });
+    return NextResponse.json(
+      { error: "REPORT_GENERATION_FAILED" },
+      { status: 500 },
+    );
   }
 }

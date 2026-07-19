@@ -1,4 +1,4 @@
-import { GithubLogo } from "@phosphor-icons/react/dist/ssr";
+import { GithubLogo, Newspaper } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 
 import { FavoritesHeaderLink } from "./favorites-header-link";
@@ -15,8 +15,13 @@ export function SiteHeader() {
           <span className="brandName">AI News Navigator</span>
         </Link>
         <div className="headerActions">
-          <Link className="dailyHeaderLink" href="/daily">
-            日报
+          <Link
+            className="iconButton dailyHeaderLink"
+            href="/daily"
+            aria-label="阅读 AI 情报简报"
+            title="情报简报"
+          >
+            <Newspaper aria-hidden="true" size={19} weight="regular" />
           </Link>
           <FavoritesHeaderLink />
           <ThemeToggle />
