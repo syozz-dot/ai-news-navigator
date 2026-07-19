@@ -1,7 +1,6 @@
 import { ArrowDown, ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 
-import { DailyEntryRail } from "../components/daily-entry-rail";
 import { EmptyFeed } from "../components/empty-feed";
 import { StoryRow } from "../components/story-row";
 import { contentTypeLabels, formatCalendarDate } from "../lib/presentation";
@@ -63,6 +62,37 @@ export default async function Home({
             <span />N<span />
           </div>
           <p>先看今天发生了什么，再理解它对产品和业务的影响。</p>
+          <aside
+            className="briefOverview"
+            aria-labelledby="brief-overview-title"
+          >
+            <div className="briefOverviewHeader">
+              <h2 id="brief-overview-title">今日概览</h2>
+              <strong>{dailyIssue.total}</strong>
+            </div>
+            <dl>
+              <div>
+                <dt>新闻</dt>
+                <dd>{dailyIssue.counts.news}</dd>
+              </div>
+              <div>
+                <dt>论文</dt>
+                <dd>{dailyIssue.counts.paper}</dd>
+              </div>
+              <div>
+                <dt>产品</dt>
+                <dd>{dailyIssue.counts.product}</dd>
+              </div>
+              <div>
+                <dt>模型</dt>
+                <dd>{dailyIssue.counts.model}</dd>
+              </div>
+            </dl>
+            <Link href={`/daily?date=${dailyIssue.issueDate}`}>
+              阅读今日日报
+              <ArrowRight aria-hidden="true" size={15} />
+            </Link>
+          </aside>
         </div>
 
         {focusStory ? (
@@ -120,41 +150,9 @@ export default async function Home({
             </div>
           </div>
         )}
-
-        <aside className="briefOverview" aria-labelledby="brief-overview-title">
-          <div className="briefOverviewHeader">
-            <div>
-              <span>DAILY OVERVIEW</span>
-              <h2 id="brief-overview-title">今日概览</h2>
-            </div>
-            <strong>{dailyIssue.total}</strong>
-          </div>
-          <dl>
-            <div>
-              <dt>新闻</dt>
-              <dd>{dailyIssue.counts.news}</dd>
-            </div>
-            <div>
-              <dt>论文</dt>
-              <dd>{dailyIssue.counts.paper}</dd>
-            </div>
-            <div>
-              <dt>产品</dt>
-              <dd>{dailyIssue.counts.product}</dd>
-            </div>
-            <div>
-              <dt>模型</dt>
-              <dd>{dailyIssue.counts.model}</dd>
-            </div>
-          </dl>
-          <Link href={`/daily?date=${dailyIssue.issueDate}`}>
-            阅读今日日报
-            <ArrowRight aria-hidden="true" size={15} />
-          </Link>
-        </aside>
       </section>
 
-      <div className="contentShell">
+      <div className="contentShell homeFeedShell">
         <section className="feedColumn" aria-labelledby="feed-title">
           <div className="feedToolbar">
             <nav className="filterNav" aria-label="内容筛选">
@@ -218,8 +216,6 @@ export default async function Home({
             </div>
           ) : null}
         </section>
-
-        <DailyEntryRail issue={dailyIssue} />
       </div>
     </main>
   );

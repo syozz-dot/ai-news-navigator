@@ -1335,7 +1335,7 @@ button {
   min-height: 336px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: minmax(300px, 3fr) minmax(0, 6fr) minmax(216px, 2fr);
+  grid-template-columns: minmax(340px, 3fr) minmax(0, 8fr);
   border-bottom: 1px solid var(--line-strong);
 }
 
@@ -2509,10 +2509,11 @@ button {
 
 .briefOverview {
   min-width: 0;
-  padding: var(--space-6) 0 var(--space-6) var(--space-5);
+  margin-top: var(--space-6);
+  padding: var(--space-5) 0 0;
   display: flex;
   flex-direction: column;
-  border-left: 1px solid var(--line);
+  border-top: 1px solid var(--line);
 }
 
 .briefOverviewHeader {
@@ -2522,10 +2523,8 @@ button {
   gap: var(--space-3);
 }
 
-.briefOverviewHeader span,
 .dailyIssueEyebrow,
-.dailySectionHeading p,
-.dailyEntryEdition {
+.dailySectionHeading p {
   color: var(--ink-tertiary);
   font-family: "JetBrains Mono Variable", monospace;
   font-size: 9px;
@@ -2533,7 +2532,7 @@ button {
 }
 
 .briefOverviewHeader h2 {
-  margin: var(--space-2) 0 0;
+  margin: 0;
   font-family: var(--font-serif);
   font-size: 18px;
   font-weight: 600;
@@ -2582,10 +2581,9 @@ button {
   font-size: 14px;
 }
 
-.briefOverview > a,
-.dailyEntryLink {
+.briefOverview > a {
   min-height: 44px;
-  margin-top: auto;
+  margin-top: var(--space-3);
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
@@ -2596,87 +2594,29 @@ button {
   font-weight: 680;
 }
 
-.briefOverview > a svg,
-.dailyEntryLink svg {
+.homeFeedShell {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.homeFeedShell .feedColumn {
+  padding-right: 0;
+}
+
+.homeFeedShell .storyColumns,
+.homeFeedShell .storyRow {
+  grid-template-columns:
+    32px
+    minmax(380px, 1.65fr)
+    minmax(320px, 1fr)
+    64px;
+}
+
+.briefOverview > a svg {
   transition: transform 150ms ease;
 }
 
-.briefOverview > a:hover svg,
-.dailyEntryLink:hover svg {
+.briefOverview > a:hover svg {
   transform: translateX(3px);
-}
-
-.dailyEntryRail {
-  min-width: 0;
-  border-left: 1px solid var(--line);
-}
-
-.dailyEntryCard {
-  position: sticky;
-  top: 68px;
-  min-height: 560px;
-  padding: var(--space-6) 0 var(--space-6) var(--space-6);
-  display: flex;
-  flex-direction: column;
-}
-
-.dailyEntryEdition {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--space-3);
-  padding-bottom: var(--space-3);
-  border-bottom: 1px solid var(--line-strong);
-}
-
-.dailyEntryDate {
-  margin: var(--space-6) 0 0;
-  color: var(--accent);
-  font-family: var(--font-serif);
-  font-size: 15px;
-}
-
-.dailyEntryCard h2 {
-  margin: var(--space-4) 0 0;
-  font-family: var(--font-serif);
-  font-size: 28px;
-  font-weight: 600;
-  letter-spacing: -0.035em;
-  line-height: 1.35;
-  text-wrap: pretty;
-}
-
-.dailyEntryMeta {
-  margin: var(--space-4) 0 0;
-  color: var(--ink-secondary);
-  font-size: 12px;
-}
-
-.dailyEntryHighlights {
-  margin: var(--space-6) 0 0;
-  padding: 0;
-  list-style: none;
-  counter-reset: daily-rail;
-}
-
-.dailyEntryHighlights li {
-  position: relative;
-  padding: var(--space-3) 0 var(--space-3) 28px;
-  border-top: 1px solid var(--line);
-  color: var(--ink-secondary);
-  font-family: var(--font-serif);
-  font-size: 13px;
-  line-height: 1.55;
-  counter-increment: daily-rail;
-}
-
-.dailyEntryHighlights li::before {
-  position: absolute;
-  top: 14px;
-  left: 0;
-  color: var(--ink-tertiary);
-  font-family: "JetBrains Mono Variable", monospace;
-  font-size: 9px;
-  content: counter(daily-rail, decimal-leading-zero);
 }
 
 .dailyPage {
@@ -3010,11 +2950,7 @@ button {
 
 @media (max-width: 1199px) {
   .briefOverview {
-    grid-column: 1 / -1;
-    min-height: 180px;
-    padding: var(--space-5) 0;
-    border-top: 1px solid var(--line);
-    border-left: 0;
+    padding-top: var(--space-4);
   }
 
   .briefOverview dl {
@@ -3041,25 +2977,15 @@ button {
     margin-top: var(--space-4);
   }
 
-  .dailyEntryRail {
-    border-top: 1px solid var(--line-strong);
-    border-left: 0;
-  }
-
-  .dailyEntryCard {
-    position: static;
-    min-height: auto;
-    padding: var(--space-6) 0;
-  }
-
-  .dailyEntryHighlights {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--space-5);
-  }
-
   .dailyIssueTitleRow {
     grid-template-columns: minmax(0, 1fr) 300px;
+  }
+
+  .homeFeedShell .storyRow {
+    grid-template-columns: 32px minmax(0, 1.4fr) minmax(220px, 1fr) 64px;
+    grid-template-areas:
+      "index headline summary score"
+      "index meta summary score";
   }
 }
 
@@ -3070,10 +2996,6 @@ button {
 
   .dailyIssueShell {
     width: calc(100% - var(--space-6));
-  }
-
-  .briefOverview {
-    min-height: 244px;
   }
 
   .briefOverview dl {
@@ -3094,11 +3016,6 @@ button {
   .briefOverview dl > div:nth-child(even) {
     padding-left: var(--space-4);
     border-left: 1px solid var(--line);
-  }
-
-  .dailyEntryHighlights {
-    grid-template-columns: 1fr;
-    gap: 0;
   }
 
   .dailyIssueHeader {
@@ -3175,6 +3092,15 @@ button {
 
   .dailyDateNav > a:nth-child(2) {
     display: none;
+  }
+
+  .homeFeedShell .storyRow,
+  .homeFeedShell .storyRow:not(.lead) {
+    grid-template-columns: 24px minmax(0, 1fr) 56px;
+    grid-template-areas:
+      "index headline score"
+      "index summary summary"
+      "index meta meta";
   }
 }
 
