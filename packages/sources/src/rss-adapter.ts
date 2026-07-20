@@ -241,7 +241,7 @@ export class RssSourceAdapter implements SourceAdapter {
     const items: RawSourceItem[] = [];
 
     for (const entry of entries) {
-      const title = textValue(entry.title);
+      const title = htmlToText(textValue(entry.title));
       const url = linkValue(entry.link);
       if (!title || !url) {
         continue;

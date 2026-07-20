@@ -88,7 +88,7 @@ describe("RssSourceAdapter", () => {
     const atom = `<?xml version="1.0" encoding="utf-8"?>
       <feed xmlns="http://www.w3.org/2005/Atom">
         <entry>
-          <title>Atom update</title>
+          <title>Atom &amp; update</title>
           <link rel="alternate" href="https://example.com/atom-update" />
           <id>atom-1</id>
           <published>2026-07-16T02:30:00Z</published>
@@ -107,7 +107,7 @@ describe("RssSourceAdapter", () => {
       atomAdapter.fetch({ now: new Date("2026-07-16T04:00:00Z") }),
     ).resolves.toEqual([
       expect.objectContaining({
-        title: "Atom update",
+        title: "Atom & update",
         url: "https://example.com/atom-update",
         author: "Example Author",
         publishedAt: new Date("2026-07-16T02:30:00Z"),

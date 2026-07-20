@@ -1,9 +1,35 @@
 export { SourceRegistry } from "./registry.js";
 export {
+  AnthropicNewsAdapter,
+  type AnthropicNewsAdapterOptions,
+} from "./anthropic-news-adapter.js";
+export {
   ArxivSourceAdapter,
   type ArxivSourceAdapterOptions,
 } from "./arxiv-adapter.js";
 export { arxivAiSource, createArxivAiAdapter } from "./definitions/arxiv-ai.js";
+export {
+  anthropicNewsSource,
+  createAnthropicNewsAdapter,
+} from "./definitions/anthropic-news.js";
+export {
+  arsTechnicaAiSource,
+  createArsTechnicaAiAdapter,
+  createGoogleAiBlogAdapter,
+  createHackerNewsAiAdapter,
+  createTechCrunchAiAdapter,
+  createTheDecoderAdapter,
+  createVentureBeatAiAdapter,
+  googleAiBlogSource,
+  hackerNewsAiSource,
+  techCrunchAiSource,
+  theDecoderSource,
+  ventureBeatAiSource,
+} from "./definitions/curated-rss.js";
+export {
+  createHuggingFaceDailyPapersAdapter,
+  huggingFaceDailyPapersSource,
+} from "./definitions/hugging-face-daily-papers.js";
 export {
   createHuggingFaceModelsAdapter,
   huggingFaceModelsSource,
@@ -28,6 +54,10 @@ export {
   HuggingFaceModelAdapter,
   type HuggingFaceModelAdapterOptions,
 } from "./hugging-face-model-adapter.js";
+export {
+  HuggingFaceDailyPapersAdapter,
+  type HuggingFaceDailyPapersAdapterOptions,
+} from "./hugging-face-daily-papers-adapter.js";
 export {
   createOpenAiNewsAdapter,
   openAiNewsSource,

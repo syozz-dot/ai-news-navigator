@@ -16,6 +16,14 @@ describe("configured sources", () => {
       "product-hunt",
       "arxiv-ai",
       "hugging-face-models",
+      "anthropic-news",
+      "google-ai-blog",
+      "hugging-face-daily-papers",
+      "hacker-news-ai",
+      "techcrunch-ai",
+      "ars-technica-ai",
+      "venturebeat-ai",
+      "the-decoder",
     ]);
   });
 });
